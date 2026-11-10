@@ -1,12 +1,21 @@
-# AgniDrishti — Evidence Brief
+# StrawHub — Evidence Brief
 
-- **Version:** 0.1
+- **Version:** 0.2
 - **Research snapshot:** 15 October 2026
 - **Purpose:** Establish the problem evidence, test core assumptions, and define what the pitching prototype may responsibly claim.
 
+> **Relocation note (StrawHub).** This brief was written for the original
+> India-focused concept and is retained as the **evidence baseline**. StrawHub's
+> mobile MVP targets an Indonesian pilot region, so the India-specific findings
+> (Karnal survey, SAMARTH, FIRMS district studies) remain **contextual evidence
+> only**. Replacing them with region-specific Indonesian evidence is a planned
+> development phase — see `ROADMAP.md`, **Phase 4 — Local Market Research**. Until
+> that phase completes, all buyers, prices, and transactions in the app remain
+> labeled simulated.
+
 ## 1. Executive summary
 
-AgniDrishti proposes to reduce agricultural residue burning by linking
+StrawHub proposes to reduce agricultural residue burning by linking
 satellite-based risk intelligence with economically viable residue
 collection and buyer matching. The concept is plausible, but it should
 not assume that all satellite hotspots are crop-residue fires, that
@@ -47,7 +56,7 @@ subset of farmers still burn residue. The decision may be influenced by
 harvesting practices, available time, collection and machinery costs,
 existing habits, access to buyers, and logistics.
 
-AgniDrishti's hypothesis is that a portion of residue burning can be
+StrawHub's hypothesis is that a portion of residue burning can be
 prevented when a farmer has a timely, convenient, and financially viable
 alternative. The platform would combine:
 
@@ -67,10 +76,10 @@ This is a hypothesis to test, not an established causal claim.
 | Burning is always the cheapest residue-removal option | The same study estimates positive net benefits for some non-burning alternatives; machine removal averaged INR 1,642/acre and manual removal INR 3,153/acre in the study | The "burning is always cheapest" claim is not supported | These are local historical survey values, not current prices and not a complete national comparison |
 | Combine harvesting and alternative costs may matter | Among surveyed wheat-residue burners, 77.08% identified combine harvesters as the main reason, 17.94% cited expensive alternatives, and 2.66% cited no other use | Operational timing and management practices are relevant intervention hypotheses | Responses are from the studied sample and should not be treated as universal causal weights |
 | Wheat straw has alternative uses | In the study, over 90% reported wheat straw commonly used as cattle fodder; 39% sold some residue and 52% reincorporated some into soil | A market and non-market uses already exist | Use categories can overlap; local surplus and buyer demand must be measured |
-| Crop-residue burning contributes to air pollution and health burdens | Lan et al. (2022), *Nature Communications*, modeled Indian crop-residue-burning air-quality impacts for 2003–2019 | Supports the general environmental rationale for reducing residue burning | The headline health estimates concern crop-residue burning broadly, not only wheat or AgniDrishti's hypothetical transactions |
+| Crop-residue burning contributes to air pollution and health burdens | Lan et al. (2022), *Nature Communications*, modeled Indian crop-residue-burning air-quality impacts for 2003–2019 | Supports the general environmental rationale for reducing residue burning | The headline health estimates concern crop-residue burning broadly, not only wheat or StrawHub's hypothetical transactions |
 | Satellite fire detections can identify exact crop-residue burning | NASA FIRMS documentation describes detections as active fires/thermal anomalies that may have several sources; clouds can hide detections | FIRMS is useful for screening and retrospective analysis | FIRMS alone cannot prove a hotspot is wheat-stubble burning or identify a farmer |
 | Biomass industry is a possible buyer segment | India's Ministry of Power SAMARTH portal lists pellet vendors, feedstock descriptions, offers, and tenders | A starting point for discovering market participants and industrial demand signals | Pellet offers/tenders do not prove a buyer accepts raw wheat straw from a given district, at a viable farm-gate price |
-| AgniDrishti will reduce burning | No intervention trial has been conducted for this concept | This is the intended impact hypothesis | Must be tested with verified collection data and an appropriate comparison; do not claim causal impact from transactions alone |
+| StrawHub will reduce burning | No intervention trial has been conducted for this concept | This is the intended impact hypothesis | Must be tested with verified collection data and an appropriate comparison; do not claim causal impact from transactions alone |
 
 ### Key source: wheat-residue management study
 
@@ -107,7 +116,7 @@ The study estimates health impacts associated with
 agricultural-residue-burning emissions across India during 2003–2019.
 Its estimates are modeled and cover crop-residue burning broadly. They
 should not be represented as wheat-only effects or as direct evidence of
-impact from an unimplemented AgniDrishti intervention.
+impact from an unimplemented StrawHub intervention.
 
 ## 4. Core hypotheses and how to test them
 
@@ -188,7 +197,7 @@ an unsupported exact tonnage or price.
 - Published research documents wheat-residue burning in at least one Indian study region.
 - Crop-residue burning contributes to air-quality and health burdens.
 - A buyer-coordination mechanism is a plausible intervention worth testing.
-- AgniDrishti is designed to connect risk intelligence with economically viable residue utilization.
+- StrawHub is designed to connect risk intelligence with economically viable residue utilization.
 
 **Claims to avoid unless new evidence is collected**
 

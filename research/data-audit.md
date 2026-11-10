@@ -1,8 +1,17 @@
-# AgniDrishti — Data Audit
+# StrawHub — Data Audit
 
-- **Version:** 0.1
+- **Version:** 0.2
 - **Research snapshot:** 15 October 2026
 - **Purpose:** Assess candidate datasets for the research phase and pitching prototype before selecting a pilot region or training a model.
+
+> **Relocation note (StrawHub).** This audit inventories India-focused sources
+> (FIRMS, SAMARTH, Indian agricultural statistics) and is retained as the
+> **methodological baseline** for how sources should be audited. StrawHub's mobile
+> MVP targets an Indonesian pilot region: equivalent Indonesian sources (active
+> fire data, agricultural statistics, local fodder and biomass buyers) must be
+> audited the same way before any market claim. This work is scheduled as
+> `ROADMAP.md` **Phase 4 — Local Market Research**. Until then, app fixtures stay
+> simulated.
 
 ## 1. Executive summary
 
@@ -282,7 +291,7 @@ For a static pitching prototype, all transaction records should include
 | Industrial biomass buyer leads | Official SAMARTH listings and tenders located | Medium for market discovery; low for verified raw wheat-straw demand in a selected pilot area |
 | Local fodder market | No district-specific price/volume dataset validated yet | Incomplete |
 | Field-calibrated residue image/tonnage dataset | Not yet assembled | Incomplete |
-| Causal intervention effect | No AgniDrishti intervention trial exists | Not established |
+| Causal intervention effect | No StrawHub intervention trial exists | Not established |
 
 ## 8. Reference links
 

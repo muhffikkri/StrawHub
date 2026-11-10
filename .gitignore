@@ -22,6 +22,7 @@ sketch
 
 .expo
 __generated__
+expo-env.d.ts
 
 ### ReactNative.Buck Stack ###
 buck-out/

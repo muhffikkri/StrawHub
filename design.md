@@ -1,334 +1,228 @@
-# AgniDrishti — Design System
+# StrawHub — Design System
+
+**Platform:** React Native (Expo) · farmer-first mobile app
 
 ## 1. Design Direction
 
-AgniDrishti is a geospatial intelligence and agricultural residue marketplace workspace.
+StrawHub is a phone-first tool a farmer uses in the field, right after harvest. The interface must work:
 
-The visual language combines:
+- outdoors in daylight,
+- one-handed on a low-end Android phone,
+- in minutes, not sessions.
 
-- Dark operational dashboard aesthetics.
-- Restrained glassmorphism.
-- Agricultural green accents.
-- Amber risk indicators.
-- High-contrast data visualization.
-- Compact but readable operational tables.
+The visual language pairs an agricultural green primary with high-contrast neutrals and warm warning tones for simulated-data notices. It should feel calm, honest, and useful — like a weighing slip and a price board, not a trading terminal.
 
-The interface should feel credible, modern, and useful to a program operator. It must not look like a speculative trading terminal or a generic marketing landing page.
-
-**Core rule:** visual polish must never obscure data provenance, uncertainty, or transaction economics.
+**Core rule:** visual polish must never obscure provenance, uncertainty, or transaction economics. Every financial number shows its costs; every simulated record says so.
 
 ## 2. Design Principles
 
-1. Data truth before visual polish.
-2. Risk is not guilt.
-3. Economics must be transparent.
-4. No forced buyer match.
-5. Progressive disclosure: summary first, detail on demand.
-6. Accessible interactions and readable contrast.
-7. Simulated information is visibly labeled.
+1. The farmer's time is the scarcest resource; every screen earns its taps.
+2. Data truth before polish.
+3. Economics must be transparent — no forced matches, no hidden costs.
+4. Progressive disclosure: summary first, detail on tap.
+5. Status is never communicated by color alone — always paired with a text label.
+6. Simulated information is visibly labeled on every screen.
+7. Touch targets are thumb-sized; primary actions sit at the bottom.
 
 ## 3. Color Tokens
 
-| Token                 | Value                    | Purpose                              |
-| --------------------- | ------------------------ | ------------------------------------ |
-| `bg.canvas`           | `#080E18`                | Main application background          |
-| `bg.sidebar`          | `#090F19`                | Navigation background                |
-| `bg.panel`            | `#111B2B`                | Default panel                        |
-| `bg.panel.strong`     | `#101A2B`                | High-opacity panel                   |
-| `bg.input`            | `#0B1422`                | Inputs and search fields             |
-| `border.subtle`       | `rgba(153,174,203,0.13)` | Glass border                         |
-| `text.primary`        | `#E8EEF7`                | Main text                            |
-| `text.secondary`      | `#A0AEC0`                | Secondary text                       |
-| `text.muted`          | `#8493A8`                | Metadata                             |
-| `accent.green`        | `#39C79A`                | Primary action and positive progress |
-| `accent.green.bright` | `#5DDBAC`                | Highlights                           |
-| `risk.elevated`       | `#F6A623`                | Elevated risk                        |
-| `risk.moderate`       | `#70A8FF`                | Moderate risk                        |
-| `risk.lower`          | `#39C79A`                | Lower risk                           |
-| `status.warning`      | `#F3C16C`                | Warning                              |
-| `status.danger`       | `#F07878`                | Errors and failed actions            |
+Defined once in `src/constants/theme.ts` (`Colors.light` / `Colors.dark`) and consumed through `useAppTheme()`. Never hardcode hex values in components.
 
-Status colors must always be paired with text or an icon. Green must not imply that a record has been verified.
+| Token            | Light     | Dark      | Purpose                              |
+| ---------------- | --------- | --------- | ------------------------------------ |
+| `background`     | `#F4F6F3` | `#0D1311` | Screen background                   |
+| `surface`        | `#FFFFFF` | `#151F1B` | Cards, tab bar                       |
+| `surfaceMuted`   | `#EDF1EC` | `#1C2823` | Inputs, chips, disabled fills         |
+| `text`           | `#17211C` | `#E9EEEA` | Primary text                        |
+| `textSecondary`  | `#57645D` | `#9AA79F` | Secondary text, captions            |
+| `border`         | 10% text  | 10% text  | Hairline card borders                |
+| `accent`         | `#1E7A4F` | `#4CC38A` | Primary action, positive progress    |
+| `accentMuted`    | `#E3F1E9` | `#173226` | Accent badge fill                    |
+| `warning`        | `#8A5A00` | `#F0C36B` | Simulated-data notices, caution      |
+| `warningMuted`   | `#FCF1D8` | `#332A14` | Demo banner fill                     |
+| `danger`         | `#B3362B` | `#F0938A` | Failed constraints, negative values  |
+| `dangerMuted`    | `#FBE3E0` | `#361C19` | Danger badge fill                    |
+| `info`           | `#205A8F` | `#7EB3E8` | In-progress statuses                 |
+| `infoMuted`      | `#E2EDF6` | `#142431` | Info badge fill                      |
+
+Dark mode follows the system setting. Warning amber is reserved for simulated-data notices and cautionary states — never decoration.
 
 ## 4. Typography
 
-- **Headings:** Manrope, with a sans-serif fallback.
-- **Body and UI:** DM Sans, with a sans-serif fallback.
-- **Page title:** 26–28 px desktop; 23–25 px mobile.
-- **Panel title:** 14–16 px.
-- **Body:** 12–14 px.
-- **Metadata:** 11–12 px where practical.
-- **Section eyebrow:** 9–10 px uppercase with restrained letter spacing.
-- Use tabular numerals for aligned KPI values when supported.
+System font stack (no bundled webfonts in the MVP — startup speed on low-end devices wins over brand typography).
 
-Avoid using tiny text for essential assumptions, financial values, or data warnings.
+| Role      | Size | Weight      |
+| --------- | ---- | ----------- |
+| Page title | 24   | 700         |
+| KPI value  | 19   | 700         |
+| Heading / card title | 17 | 700 |
+| Body       | 14   | 400–600     |
+| Caption    | 12   | 400         |
+| Micro (badges, eyebrows) | 10 | 600–700, uppercase, letter-spaced |
 
-## 5. Spacing, Radius, and Elevation
+Minimum body size is 14 — farmers often read in bright light. Micro type is never used for financial values, assumptions, or warnings.
 
-Use a 4 px spacing scale:
+## 5. Spacing, Radius, Layout
 
-- `space-1`: 4 px
-- `space-2`: 8 px
-- `space-3`: 12 px
-- `space-4`: 16 px
-- `space-5`: 20 px
-- `space-6`: 24 px
-- `space-8`: 32 px
-- `space-10`: 40 px
+Spacing scale (`Spacing`): `xs 4 · sm 8 · md 12 · lg 16 · xl 24 · xxl 32`.
 
-Radius:
+Radius (`Radius`): chips/badges `sm 6`, cards `lg 14`, pills `999`.
 
-- Small controls: 6–8 px.
-- Cards: 10–12 px.
-- Dialogs: 12–16 px.
-- Badges: 5–6 px.
+Layout rules:
 
-Glass surfaces should use a dark translucent background, subtle border, and moderate backdrop blur. Text and controls must remain readable when blur is unavailable.
+- Screen padding: `lg 16`.
+- Cards gap: `md 12`.
+- KPI cards sit in a single row of at most three; two when values are long.
+- Max content width on tablets/web: 720 (`MaxContentWidth`).
+- Lists live in a `ScrollView`; forms with bottom actions use a fixed footer above a scrolling body.
 
-Use restrained shadows. Avoid excessive glow, neon outlines, and decorative transparency behind dense tables.
+## 6. Navigation
 
-## 6. Application Layout
+Bottom tab bar, four destinations, plain-word labels:
 
-### Desktop
+1. **Home** — overview, quick actions, active deals.
+2. **Registry** — registered residue records.
+3. **Matches** — buyer candidates for the selected record.
+4. **Deals** (Transactions) — active and finished transactions.
 
-- Fixed sidebar approximately 230–250 px wide.
-- Topbar approximately 60–66 px high.
-- Main content padding approximately 24–32 px.
-- Overview dashboard uses four KPI cards, a primary risk map, contextual risk panel, charts, and recent transactions.
-- Primary actions appear consistently near the page title.
+Stack screens above the tabs: **Register Residue** (3-step wizard), **Transaction detail**, **Impact & Evidence**.
 
-### Tablet
+Rules:
 
-- Sidebar becomes a drawer.
-- Use two-column layouts only when the available width supports readable content.
-- Tables may scroll horizontally.
+- Every primary destination is reachable in one tap; every stack screen in two.
+- Back is always labeled (“Back”), never icon-only.
+- A persistent `SIMULATED DATA` banner appears at the top of every tab screen.
 
-### Mobile
+## 7. Core Components
 
-- Drawer navigation.
-- KPI cards in a two-column grid.
-- Single-column content.
-- Full-width form actions.
-- Tables use horizontal scrolling or dedicated compact list rows.
-- Map controls and legends must not obscure essential content.
+All live in `src/components/ui.tsx` and consume theme tokens only.
 
-## 7. Navigation
+### 7.1 Screen
 
-Main navigation order:
+Safe-area wrapper with title, optional subtitle, the demo banner, and a scrolling body. `scroll={false}` for screens managing their own scroll (e.g. forms with fixed footers).
 
-1. Overview
-2. Risk Intelligence
-3. Residue Registry
-4. Buyer Matching
-5. Transactions
-6. Impact & Evidence
+### 7.2 DemoBanner
 
-Each item has an icon, readable label, and active state.
+Persistent amber strip: “SIMULATED DATA — all records, prices and transactions are illustrative and not field-verified.” Present on every tab screen. Never dismissible in the prototype.
 
-The topbar includes:
+### 7.3 Badge / ProvenanceBadge / VerificationBadge / StatusBadge
 
-- Current page or breadcrumb.
-- A persistent “SIMULATED DATA” indicator in demo mode.
-- Optional notification area.
-- User or demo profile control.
+Pill badges with a muted fill and a 10 pt uppercase bold label.
 
-Navigation labels must be consistent across pages and documentation.
+- Provenance: `SIMULATED` (warning), `OBSERVED` (info), `DERIVED` (neutral), `VERIFIED` (accent).
+- Verification: `Not yet verified`, `Verification pending`, `Verified`, `Verification rejected`, `Needs review`.
+- Transaction status uses `StatusBadge` with the labels from `src/domain/transactions.ts`.
 
-## 8. Core Components
+Provenance and verification are separate concepts; a badge from one family never substitutes for the other.
 
-### 8.1 KPI Card
+### 7.4 Card / KpiCard
 
-Contains:
+Cards: `surface` fill, hairline border, radius 14, padding 16, gap 4. Pressable variants dim to 80% opacity — no elevation change.
 
-- Metric label.
-- Primary value and unit.
-- Optional contextual description.
-- Data provenance badge where applicable.
+KpiCard: micro uppercase label, 19 pt value, optional caption and badge. Values include units; no growth percentages without a defined baseline.
 
-Do not display growth percentages unless the comparison period and baseline are defined.
+### 7.5 LabelValueRow
 
-### 8.2 Provenance Badge
+Two-column label/value row; value is semibold, right-aligned, optionally tinted (danger for deductions, accent for measured quantities). Used for all economics breakdowns and record details.
 
-Use four standardized labels:
+### 7.6 PrimaryButton / GhostButton
 
-- `SIMULATED`: created for the demo.
-- `OBSERVED`: collected from a real source but not necessarily verified.
-- `DERIVED`: calculated from other data.
-- `VERIFIED`: reviewed according to a documented verification process.
+Primary: accent fill, white semibold label, radius 10, vertical padding 12, full-width in cards and footers. Disabled: muted fill, secondary text.
 
-Provenance is separate from transaction status and verification status.
+Ghost: transparent, semibold label in `textSecondary` (accent/danger variants for flow actions).
 
-### 8.3 Risk Badge
+### 7.7 ChoiceChip
 
-- Elevated: amber.
-- Moderate: blue.
-- Lower: green.
-- Unknown: neutral.
+Selection pill used for controlled vocabularies (residue type, units, condition, handling form). Active chip: accent fill, white text. Every chip is a labeled button with an accessibility state.
 
-Show a text label alongside color. Provide a detail view explaining the score, time horizon, contributing signals, and limitations.
+### 7.8 EmptyState
 
-Avoid labels such as “confirmed burning” unless independently verified evidence supports that conclusion.
+Centered card with a title, one-sentence body, and an optional full-width action. Used for empty lists, no matches, and not-found records.
 
-### 8.4 Risk Map
+## 8. Screen Patterns
 
-- Dark basemap or clearly labeled illustrative map.
-- Distinct markers for different risk bands.
-- Visible legend.
-- Marker clustering when necessary.
-- Clickable markers that open a zone detail panel.
-- Loading, unavailable, and empty states.
-- Explicit “Illustrative map — not for navigation” notice for simulated geometry.
+### 8.1 Economics breakdown
 
-Do not use arbitrary decorative markers in a way that suggests precise real-world locations.
+Always the same order, in `LabelValueRow`s:
 
-### 8.5 Residue Form
+1. Indicative price (with basis label).
+2. Gross value.
+3. Deductions with explicit minus signs.
+4. Indicative net proceeds (accent when positive, danger when negative).
+5. Assumption caption: missing costs, validity, “not a guaranteed price or profit.”
 
-Group fields into:
+One shared domain function (`src/domain/economics.ts`) computes these; screens only format.
 
-1. Farmer and location.
-2. Crop and residue characteristics.
-3. Estimated quantity and availability.
-4. Optional photo and notes.
-5. Estimate summary and confirmation.
+### 8.2 Match card
 
-Every field has a persistent label. Units are explicit. Errors appear beside the relevant field.
+Buyer name, type/location/distance line, fit badge (`RULE-BASED FIT` / `NOT ELIGIBLE`), blocker list with `✕` markers, economics for eligible candidates, then the primary action. When no candidate is eligible, a `NO VIABLE MATCH` card explains that no-match is a valid outcome.
 
-The estimate summary must disclose the formula and assumptions. Photo upload must not imply that mass or moisture has been measured accurately.
+### 8.3 Registration wizard
 
-### 8.6 Buyer Card
+Three steps, one screen each: crop & field → quantity & timing → review. Auto-estimate for quantity is offered with its assumption shown; the farmer can override. Errors render in a danger box under the relevant step, never as toasts. Fixed footer: Back/Cancel on the left, Continue/Submit on the right.
 
-Show:
+### 8.4 Transaction detail
 
-- Buyer name and use category.
-- Material requirements.
-- Indicative price and currency.
-- Price basis: farm-gate, delivered, or unknown.
-- Quantity constraints.
-- Distance or logistics estimate.
-- Quote validity and verification status.
-- Eligibility result and reasons.
-
-Use “Rule-based fit” for a demo match rather than an unexplained percentage score.
-
-### 8.7 Economics Calculator
-
-Display the calculation in this order:
-
-1. Sellable quantity.
-2. Indicative gross value.
-3. Transportation cost.
-4. Loading, baling, and other known costs.
-5. Indicative net value.
-6. Missing costs and assumptions.
-
-Use explicit negative signs for deductions. Negative net values remain visible.
-
-Avoid the word “profit” unless all relevant costs are known. Prefer “indicative net proceeds” when the estimate is incomplete.
-
-### 8.8 Transaction Status
-
-Supported labels:
-
-- Draft
-- Offered
-- Farmer Accepted
-- Pickup Scheduled
-- Collected / Weighed
-- Payment Pending
-- Completed
-- Rejected
-- Cancelled
-- Disputed
-- Needs Review
-
-Each status uses a text label and a visual marker. The transaction detail view includes an event timeline with timestamps and actors when available.
-
-### 8.9 Charts
-
-- Clear axis labels and units.
-- Restrained grid lines.
-- Tooltips with values and periods.
-- Limited number of series.
-- Persistent simulated-data label for demo charts.
-
-Charts must not hide important definitions or methodological caveats.
-
-### 8.10 Dialogs, Drawers, and Toasts
-
-- Use dialogs for short, focused actions.
-- Use dedicated pages for longer forms.
-- Use drawers for contextual zone, buyer, or transaction details.
-- Use toast messages for brief confirmations.
-- Keep critical errors visible in the relevant form or page.
+Status badge plus “Demo transaction — no real payment” note, quantity rows (estimate and measurement separate), weighbridge input when appropriate, a reverse-chronological event timeline, and a “move to next status” list offering only state-machine-legal transitions.
 
 ## 9. Required UI States
 
-Every major module must support:
+Every list or module must handle:
 
-- Loading.
+- Loading (fixtures load synchronously in the prototype — states arrive with real APIs).
 - Empty.
-- Error.
-- No results.
-- No viable match.
-- Needs verification.
+- Error (network/API phase).
+- No results / no viable match.
+- Not yet verified.
 - Success.
-- Permission denied, when authorization is implemented.
-
-A no-match state should explain why candidates failed and what information or condition could change the result.
+- Permission denied (post-auth phases).
 
 ## 10. Copywriting and Terminology
 
 Prefer:
 
-- “Estimated available residue” instead of “Available” for unverified supply.
-- “Indicative price” instead of “Guaranteed price.”
-- “Elevated risk” instead of “Confirmed burning.”
-- “Demo transaction” instead of implying a real commercial agreement.
-- “Not yet verified” instead of vague confirmation language.
-- “Potentially diverted from burning” only when the evidence supports the claim.
+- “Estimated available residue” — never “available” for unverified supply.
+- “Indicative price” / “Indicative net proceeds” — never “guaranteed” or “profit”.
+- “Not yet verified” — never vague confirmation.
+- “Demo transaction” — never imply a real commercial agreement.
+- “Not estimated” for environmental impact — never zero or a fabricated value.
 
-Use tonnes, acres, and INR (₹) consistently for the initial India-focused demo. Currency, dates, and units should be formatted through shared utilities rather than hardcoded throughout components.
+Units and currency format through `src/lib/format.ts` (IDR via `Intl.NumberFormat('id-ID')`, tonnes, ISO dates). Never hardcode formatted values in components.
 
 ## 11. Accessibility and Interaction
 
-- All actions must have meaningful labels.
-- Keyboard focus must be visible.
-- Status must not be communicated by color alone.
-- Inputs must have persistent labels and clear errors.
-- Icon-only controls require accessible names.
-- Dialog focus must be managed.
-- Respect reduced-motion preferences.
-- Avoid hover-only interactions.
-- Ensure sufficient contrast on translucent panels.
+- Minimum touch target: 44×44 effective.
+- Status colors always pair with text labels.
+- Inputs have persistent `accessibilityLabel`s; chips expose `accessibilityState.selected`.
+- Icon-free navigation: tabs and actions use plain words.
+- Contrast: body text ≥ 4.5:1 against its surface in both modes.
+- Forms validate on submit; errors appear in place, beside the step they belong to.
+- Respect the OS reduced-motion setting (prototype motion is limited to press-state opacity).
 
 ## 12. Motion
 
-- Hover and focus feedback: approximately 120–180 ms.
-- Drawer and panel transitions: approximately 180–240 ms.
-- Avoid decorative animation that distracts from maps or operational decisions.
-- Motion must not carry essential information.
+- Press feedback: opacity 0.8, no duration tuning needed.
+- No decorative animation, screen transitions, or parallax in the prototype.
+- Motion never carries essential information.
 
 ## 13. Implementation Rules
 
-- Centralize design tokens.
-- Use reusable UI components.
-- Keep business calculations out of presentation components.
-- Keep risk, residue, matching, transaction, and impact components in domain-specific folders.
-- Use a consistent icon library.
-- Keep provenance metadata available throughout the UI.
-- Do not duplicate business logic between dashboard cards and detail pages.
+- Design tokens live only in `src/constants/theme.ts`; screens read them via `useAppTheme()`.
+- Domain logic never imports React Native; UI components never re-implement business rules.
+- One shared economics calculation everywhere.
+- Controlled vocabularies (residue types, conditions, forms, statuses) are typed in `src/domain/types.ts`.
+- Formatting goes through `src/lib/format.ts`.
+- Demo fixtures come from one source (`src/data/fixtures.ts`) so screens cannot disagree.
 
 ## 14. Design QA Checklist
 
-- [ ] Simulated data is clearly identified.
-- [ ] All financial values include currency and unit.
-- [ ] Risk bands have text labels.
-- [ ] The map includes a legend and appropriate disclaimer.
-- [ ] Net proceeds show known deductions.
-- [ ] No unsupported emissions claims appear.
-- [ ] Empty, error, loading, and no-match states exist.
-- [ ] Mobile tables and forms remain usable.
-- [ ] Keyboard focus is visible.
-- [ ] Secondary text remains readable.
-- [ ] Every primary action produces feedback.
-- [ ] No critical interaction depends on hover alone.
+- [ ] Simulated data is identified on every screen.
+- [ ] Every financial value includes currency and unit.
+- [ ] Deductions show explicit minus signs; negative nets stay visible.
+- [ ] Blockers and no-match states explain themselves.
+- [ ] Estimated and measured quantities are never merged into one number.
+- [ ] Status is never color-only.
+- [ ] Primary actions are bottom-anchored and thumb-reachable.
+- [ ] Body text ≥ 14 pt; financial values never in micro type.
+- [ ] Empty and not-found states exist for every list.
+- [ ] Every primary action produces visible feedback.

@@ -1,685 +1,207 @@
-# AgniDrishti — System Specification
+# StrawHub — System Specification
 
-**Version:** 0.1  
-**Status:** Draft for prototype implementation  
-**Architecture:** Modular monolith  
-**Initial data mode:** Simulated fixtures  
-**Target region:** To be selected after data validation
+**Version:** 0.2
+**Status:** Phase 1 implemented; see `ROADMAP.md`
+**Platform:** React Native 0.88 / Expo SDK 58, runnable in Expo Go
+**Architecture:** Single Expo app, modular domain layer
+**Initial data mode:** Simulated fixtures
 
 ## 1. Purpose
 
-This specification defines the technical boundaries, domain modules, data structures, business rules, transaction workflow, validation, and testing strategy for AgniDrishti.
+This specification defines the technical boundaries, domain modules, data structures, business rules, and testing strategy for the StrawHub mobile app.
 
-The initial implementation should demonstrate a credible end-to-end workflow without requiring live satellite ingestion, a production prediction model, real buyer integrations, or real payments.
-
-The architecture should permit these capabilities to be added later without rewriting the application around a microservices architecture.
+The initial implementation demonstrates a credible farmer-facing workflow without a backend, real buyer integrations, or payments. Later phases add those without rewriting the app around a new architecture.
 
 ## 2. System Boundary
 
-### In scope for the prototype
+### In scope for the mobile prototype
 
-- Dashboard and navigation.
-- Simulated risk zones.
-- Residue registration.
-- Buyer listings and requirements.
-- Rule-based matching.
-- Indicative economic calculations.
-- Transaction state transitions.
-- Impact and evidence summaries.
-- Provenance labels and methodological limitations.
+- Tab navigation: Home, Registry, Matches, Deals.
+- Residue registration wizard (3 steps, validated).
+- Rule-based buyer matching with blockers.
+- Shared economics calculation.
+- Transaction state machine with event timeline.
+- Impact & evidence screen.
+- Provenance labels and methodological limits.
+- Runs in Expo Go (SDK 58) on Android and iOS.
 
-### Out of scope for the prototype
+### Out of scope for the mobile prototype
 
-- Live satellite data ingestion.
-- Operational fire prediction.
-- Real farmer identity verification.
-- Real-time buyer quotations.
+- Backend, accounts, and authentication.
+- Real buyer quotations or integrations.
 - Payment processing.
-- Live truck dispatch.
-- Production user authentication.
+- Live truck dispatch or logistics scheduling.
+- Satellite risk intelligence (operator surfaces, later phases).
 - Verified avoided-emission reporting.
+- Push notifications, camera capture, offline persistence.
 
 ## 3. Architecture Principles
 
-1. Start with a modular monolith.
-2. Separate domain rules from UI components.
-3. Preserve provenance and verification status throughout the system.
-4. Never interpret a hotspot alone as proof of crop-residue burning.
-5. Do not force an uneconomic buyer match.
-6. Make all financial calculations reproducible.
-7. Keep demo fixtures explicitly separate from future production data.
-8. Use independent validation before describing a model as predictive or operational.
+1. One Expo app; domain logic stays plain TypeScript with no React Native imports.
+2. State is managed centrally (one Context store) so screens cannot disagree.
+3. Provenance and verification status travel with every record.
+4. Never force an uneconomic buyer match.
+5. All financial calculations reproducible through one function.
+6. Demo fixtures stay explicitly separate from future production data.
+7. Prefer Expo Go–compatible dependencies until a development build is justified.
 
 ## 4. Technology Stack
 
-### 4.1 Prototype
+| Layer | Choice |
+| --- | --- |
+| Runtime | Expo SDK 58, React Native 0.88, React 19.3 |
+| Language | TypeScript (strict) |
+| Navigation | expo-router (file-based, typed routes) |
+| State | React Context + reducer (`src/store/demo-store.tsx`) |
+| Styling | StyleSheet with centralized tokens (`src/constants/theme.ts`) |
+| Data | Local fixtures (`src/data/fixtures.ts`) |
+| Formatting | `Intl` via shared helpers (`src/lib/format.ts`) |
 
-- Next.js App Router.
-- React and TypeScript.
-- CSS or Tailwind CSS.
-- Recharts for charts.
-- Lucide icons.
-- Local JSON fixtures.
-- Local component state for interactive demo behavior.
+Planned (later phases): Jest unit tests for the domain layer, AsyncStorage persistence, i18n, camera via `expo-image-picker`, push notifications, and a backend service.
 
-The prototype may use client-side state for demonstration, but state should be managed centrally enough to prevent inconsistent values between the dashboard, registry, and transaction pages.
-
-### 4.2 Future operational foundation
-
-- PostgreSQL for relational data.
-- PostGIS for geographic queries and geometries.
-- Prisma or Drizzle ORM; choose one consistently.
-- Next.js route handlers or server actions.
-- Zod or an equivalent schema validation library.
-- Private object storage for photographs and transaction evidence.
-- Authentication and role-based access control.
-- Background jobs for data ingestion when operational needs justify them.
-
-Do not introduce microservices, a message broker, or a separate model-serving platform until a demonstrated requirement justifies the added complexity.
-
-## 5. Recommended Directory Structure
+## 5. Directory Structure
 
 ```text
-agnidrishti/
-├── app/
-│   ├── (dashboard)/
-│   │   ├── overview/
-│   │   ├── risk-intelligence/
-│   │   ├── residue/
-│   │   ├── marketplace/
-│   │   ├── transactions/
-│   │   └── impact/
-│   ├── farmer/
-│   ├── buyer/
-│   └── api/
-├── components/
-│   ├── ui/
-│   ├── layout/
-│   ├── maps/
-│   ├── charts/
-│   ├── residue/
-│   ├── marketplace/
-│   └── transactions/
-├── modules/
-│   ├── risk/
-│   ├── residue/
-│   ├── pricing/
-│   ├── matching/
-│   ├── transactions/
-│   └── impact/
-├── lib/
-│   ├── validation/
-│   ├── provenance/
-│   ├── errors/
-│   └── format/
-├── data/
-│   └── fixtures/
-├── research/
+strawhub/
+├── app.json
+├── assets/
+├── src/
+│   ├── app/                      # expo-router routes
+│   │   ├── _layout.tsx           # root stack + DemoProvider
+│   │   ├── (tabs)/
+│   │   │   ├── _layout.tsx       # bottom tabs
+│   │   │   ├── index.tsx         # Home
+│   │   │   ├── registry.tsx      # Residue registry
+│   │   │   ├── matches.tsx       # Buyer matching
+│   │   │   └── transactions.tsx   # Deals list
+│   │   ├── register.tsx          # 3-step registration wizard
+│   │   ├── impact.tsx            # Impact & evidence
+│   │   └── transaction/[id].tsx  # Transaction detail
+│   ├── components/ui.tsx         # themed primitives
+│   ├── constants/theme.ts        # design tokens
+│   ├── domain/                   # no React Native imports
+│   │   ├── types.ts
+│   │   ├── economics.ts
+│   │   ├── matching.ts
+│   │   ├── transactions.ts
+│   │   └── impact.ts
+│   ├── data/fixtures.ts          # simulated dataset + metadata
+│   ├── hooks/use-app-theme.ts
+│   ├── lib/format.ts
+│   └── store/demo-store.tsx
 ├── PRD.md
 ├── design.md
-└── spec/
-    └── system-spec.md
+├── ROADMAP.md
+├── spec/system-spec.md
+└── research/
 ```
 
-Domain modules must not import React presentation components. UI components may consume domain types and call domain services.
+Rule: `domain/` may not import React or React Native. UI components may consume domain types and call domain functions. Business logic must never be duplicated between screens.
 
 ## 6. Domain Modules
 
-### 6.1 Risk Intelligence
+### 6.1 Residue (`types.ts`, store)
 
-Responsibilities:
+Create residue records with crop type, field area + unit, harvest date, condition, handling form, estimated quantity + method, availability window, verification status, provenance. Estimated and measured quantities stay separate fields.
 
-- Maintain risk zones and contextual signals.
-- Store risk assessments with horizon, method version, provenance, and uncertainty.
-- Track review and follow-up status.
-- Present explanatory factors to the operator.
+### 6.2 Economics (`economics.ts`)
 
-It must not automatically conclude that a hotspot is agricultural burning.
-
-### 6.2 Residue
-
-Responsibilities:
-
-- Create and update residue records.
-- Store crop and residue types, harvest dates, condition, estimated volume, and availability.
-- Track verification.
-- Preserve estimated and measured quantities separately.
-
-### 6.3 Pricing and Economics
-
-Responsibilities:
-
-- Store buyer quotes and their validity.
-- Calculate gross value and known costs.
-- Produce an indicative net estimate.
-- Identify missing cost inputs.
-- Compare proceeds against an alternative-use baseline when evidence exists.
-
-### 6.4 Matching
-
-Responsibilities:
-
-- Apply hard eligibility constraints.
-- Evaluate material, quantity, timing, and logistics.
-- Return eligible, ineligible, or needs-information results.
-- Explain why a candidate is or is not suitable.
-
-### 6.5 Transactions
-
-Responsibilities:
-
-- Create offers.
-- Enforce valid state transitions.
-- Record status events.
-- Track scheduled pickup, measured weight, accepted quantity, and payment confirmation separately.
-
-### 6.6 Impact and Evidence
-
-Responsibilities:
-
-- Aggregate operational metrics.
-- Preserve source and calculation provenance.
-- Track methodology versions.
-- Avoid environmental claims when evidence is insufficient.
-
-## 7. Logical Data Model
-
-Production tables should use stable IDs and timestamps. Relevant records should also contain provenance and verification fields.
-
-### 7.1 AgriculturalZone
-
-- `id`
-- `name`
-- `adminRegion`
-- `geometry`
-- `cropContext`
-- `harvestWindowStart`
-- `harvestWindowEnd`
-- `provenance`
-- `verificationStatus`
-
-### 7.2 RiskAssessment
-
-- `id`
-- `zoneId`
-- `score`
-- `riskBand`
-- `horizonStart`
-- `horizonEnd`
-- `methodVersion`
-- `featureSummary`
-- `uncertainty`
-- `provenance`
-- `assessmentStatus`
-- `createdAt`
-
-The score must not be called a probability unless the underlying method produces a calibrated probability. Every score needs a time horizon and method version.
-
-### 7.3 ResidueRecord
-
-- `id`
-- `farmerId` (optional for the demo)
-- `zoneId`
-- `cropType`
-- `residueType`
-- `fieldAreaValue`
-- `fieldAreaUnit`
-- `harvestDate`
-- `condition`
-- `handlingForm`
-- `estimatedQuantityTonnes`
-- `measuredQuantityTonnes`
-- `availableFrom`
-- `availableUntil`
-- `photoAssetIds`
-- `verificationStatus`
-- `provenance`
-- `notes`
-
-### 7.4 Buyer
-
-- `id`
-- `name`
-- `buyerType`
-- `location`
-- `serviceArea`
-- `activeStatus`
-- `verificationStatus`
-- `protectedContactData`
-
-### 7.5 BuyerRequirement
-
-- `id`
-- `buyerId`
-- `acceptedResidueTypes`
-- `minimumVolumeTonnes`
-- `maximumVolumeTonnes`
-- `acceptedConditions`
-- `acceptedHandlingForms`
-- `maximumMoisturePct`
-- `priceValue`
-- `priceCurrency`
-- `priceUnit`
-- `priceBasis`
-- `validFrom`
-- `validUntil`
-- `pickupTerms`
-- `provenance`
-- `verificationStatus`
-
-Price basis must distinguish farm-gate, delivered, ex-works, and unknown. Quotes must not be presented as guaranteed if they have not been confirmed.
-
-### 7.6 LogisticsEstimate
-
-- `id`
-- `residueRecordId`
-- `buyerId`
-- `distanceKm`
-- `transportCost`
-- `loadingCost`
-- `balingCost`
-- `otherCosts`
-- `calculationVersion`
-- `provenance`
-
-### 7.7 MatchCandidate
-
-- `id`
-- `residueRecordId`
-- `buyerId`
-- `eligibilityStatus`
-- `blockers`
-- `estimatedGrossValue`
-- `estimatedTotalKnownCost`
-- `estimatedFarmerNet`
-- `alternativeUseBaseline`
-- `calculationVersion`
-- `provenance`
-
-### 7.8 Transaction
-
-- `id`
-- `residueRecordId`
-- `buyerId`
-- `offerPrice`
-- `currency`
-- `estimatedQuantityTonnes`
-- `measuredQuantityTonnes`
-- `acceptedQuantityTonnes`
-- `paidQuantityTonnes`
-- `status`
-- `pickupScheduledAt`
-- `collectedAt`
-- `paymentConfirmedAt`
-- `provenance`
-
-### 7.9 TransactionEvent
-
-- `id`
-- `transactionId`
-- `fromStatus`
-- `toStatus`
-- `actorId`
-- `occurredAt`
-- `note`
-- `evidenceAssetIds`
-- `provenance`
-
-For production, transaction events should be append-only or otherwise auditable.
-
-### 7.10 ImpactEstimate
-
-- `id`
-- `transactionId`
-- `massCollectedTonnes`
-- `massLikelyDivertedTonnes`
-- `counterfactualMethod`
-- `emissionFactorSource`
-- `emissionFactorVersion`
-- `estimatedAvoidedEmissions`
-- `unit`
-- `uncertaintyRange`
-- `methodVersion`
-- `provenance`
-- `status`
-
-## 8. Provenance and Verification
-
-### Provenance values
-
-- `simulated`: created for demonstration.
-- `observed`: measured or collected from a real source but not necessarily verified.
-- `derived`: calculated from other inputs.
-- `verified`: reviewed under a documented verification procedure.
-
-### Verification status
-
-- `unverified`
-- `pending`
-- `verified`
-- `rejected`
-- `needs_review`
-
-These concepts are separate. A value can be derived from observed data and still require review. A real observation is not automatically verified.
-
-## 9. Business Rules
-
-### 9.1 Risk assessment
-
-- Risk bands: `lower`, `moderate`, `elevated`, `unknown`.
-- Score range: 0–1 only where the scoring method defines that range.
-- Store horizon, method version, provenance, and feature summary.
-- A hotspot is a thermal observation, not a definitive cause label.
-- Missing data produces `unknown` or a clearly qualified result.
-- Risk prioritization must not automatically trigger penalties or accusations.
-
-### 9.2 Residue quantity
-
-- Store estimated and measured quantities independently.
-- Display estimation method and assumptions.
-- Do not treat a photo as a precise mass or moisture measurement.
-- Quantity must be positive and include an explicit unit.
-- Reject invalid dates, non-finite numbers, and impossible input ranges.
-
-### 9.3 Buyer eligibility
-
-Evaluate hard constraints before ranking:
-
-1. The buyer accepts the residue type.
-2. Condition and handling form meet requirements.
-3. Quantity satisfies buyer limits or an explicitly supported aggregation rule.
-4. Availability dates fit the buyer's requested window.
-5. Price and quote validity are sufficiently clear.
-6. Logistics information is adequate for a meaningful economic estimate.
-
-Results:
-
-- `eligible`: hard constraints pass.
-- `ineligible`: one or more constraints fail.
-- `needs_information`: critical information is missing.
-
-A ranking score must never override a failed hard constraint. “No viable match” is a valid outcome.
-
-### 9.4 Economics
-
-Calculate using one shared domain function:
+One function `calculateEconomics({ sellableQuantityTonnes, buyer })`:
 
 ```text
-grossValue =
-  sellableQuantityTonnes * acceptedPricePerTonne
-
-knownCosts =
-  transportCost
-  + loadingCost
-  + balingCost
-  + otherKnownCosts
-
-indicativeNetProceeds =
-  grossValue - knownCosts
+grossValue    = sellableQuantityTonnes × pricePerTonne
+transportCost = 0                        when priceBasis = delivered
+             = quantity × costPerTonne   otherwise
+knownCosts    = transportCost + loadingCost + balingCost
+netProceeds   = grossValue − knownCosts
 ```
 
-Rules:
+- Missing inputs are reported (`missingCostInputs`), never silently zero-filled.
+- Delivered quotes never get transport charged twice.
+- Negative net proceeds remain visible.
 
-- Use sellable quantity, not automatically the initial estimated quantity.
-- Explicitly convert all units.
-- Do not subtract transportation twice when the quote already includes delivery.
-- If costs are missing, label the result as partial and list missing inputs.
-- Negative values must remain visible.
-- Indicative net proceeds are not necessarily profit.
-- Positive proceeds do not automatically mean the farmer is better off than their alternative.
+### 6.3 Matching (`matching.ts`)
 
-To establish incremental farmer benefit, compare with an evidenced alternative-use baseline where possible.
+`evaluateMatch(record, buyer)` applies hard constraints in order: residue type → condition → handling form → volume min/max → availability window → quote validity. Result: `eligible | ineligible` with explicit blockers. `findMatches` sorts eligible candidates by best net proceeds; ranking never overrides a failed constraint.
 
-### 9.5 Transaction state machine
+### 6.4 Transactions (`transactions.ts`)
 
-Primary path:
+State machine with `ALLOWED_TRANSITIONS`; `canTransition`, `nextStatuses`, `isTerminal`, `progressStep`. The store rejects invalid transitions silently and records an event (from/to status, actor, timestamp, note) for each accepted one.
 
-`Draft → Offered → Farmer Accepted → Pickup Scheduled → Collected / Weighed → Payment Pending → Completed`
+### 6.5 Impact (`impact.ts`)
 
-Alternative states:
+`summarizeOperations(residue, transactions)` aggregates registered/verified/collected/sold tonnes and completion rate. Environmental impact is never derived here — the impact screen renders “Not estimated” until a documented method exists.
 
-- `Rejected`
-- `Cancelled`
-- `Disputed`
-- `Needs Review`
+## 7. Data Model
 
-Allowed transitions include:
+Types in `src/domain/types.ts`:
 
-- Draft → Offered.
-- Offered → Farmer Accepted, Rejected, or Cancelled.
-- Farmer Accepted → Pickup Scheduled, Cancelled, or Needs Review.
-- Pickup Scheduled → Collected / Weighed, Cancelled, or Needs Review.
-- Collected / Weighed → Payment Pending or Needs Review.
-- Payment Pending → Completed, Disputed, or Needs Review.
-- Disputed → Completed, Cancelled, or Needs Review.
-- Needs Review → an explicitly authorized resolution.
+- **ResidueRecord** — `id`, `farmerName`, `zone`, `residueType`, `fieldAreaValue`, `fieldAreaUnit`, `harvestDate`, `condition`, `handlingForm`, `estimatedQuantityTonnes`, `estimateMethod`, `availableFrom`, `availableUntil`, `photoCount`, `verificationStatus`, `provenance`, `createdAt`.
+- **Buyer** — `id`, `name`, `buyerType`, `location`, `distanceKm`, cost rates, `requirement`, `verificationStatus`.
+- **BuyerRequirement** — accepted types/conditions/forms, volume min/max, required window, `pricePerTonne`, `priceBasis` (`farm_gate | delivered | unknown`), `validUntil`.
+- **Transaction** — `id`, `residueRecordId`, `buyerId`, `offerPricePerTonne`, estimated/measured/accepted quantities, `status`, schedule timestamps, `provenance`.
+- **TransactionEvent** — append-only audit trail per transaction.
 
-Each transition should record timestamp, actor, and reason where relevant. The demo must clearly state that status changes do not represent real payment or collection.
+Controlled vocabularies: `ResidueType`, `ResidueCondition`, `HandlingForm`, `TransactionStatus`, `Provenance`, `VerificationStatus`.
 
-### 9.6 Environmental impact
+### Provenance and verification
 
-Distinguish:
+- Provenance: `simulated | observed | derived | verified`.
+- Verification: `unverified | pending | verified | rejected | needs_review`.
 
-- Mass registered.
-- Mass verified.
-- Mass collected.
-- Mass accepted by a buyer.
-- Mass likely diverted from burning.
-- Estimated emissions avoided.
+These are separate axes. A derived value can still need review; an observed value is not automatically verified.
 
-Collected mass is not automatically diverted mass. Diverted mass requires a defensible estimate of what would otherwise have happened.
+## 8. Business Rules
 
-Avoided emissions require:
+1. Quantity must be positive with an explicit unit; estimates carry a visible method.
+2. A photo (future) is never treated as a mass or moisture measurement.
+3. Eligibility fails on any hard constraint; “no viable match” is valid and explainable.
+4. Price basis distinguishes farm-gate, delivered, and unknown; delivered quotes skip transport costs.
+5. Only state-machine-legal transitions are offered in the UI.
+6. Measured weight never overwrites the estimate; both remain visible.
+7. Demo completion never implies real payment.
+8. Collected mass ≠ diverted mass; avoided emissions require a documented counterfactual — render “Not estimated” otherwise.
 
-- A documented counterfactual.
-- Appropriate emission factors and sources.
-- Clear system boundaries.
-- Method version and uncertainty.
-- Review appropriate to the intended claim.
+## 9. Demo Data Contract
 
-If inputs are insufficient, return `null` or “Not estimated,” not a fabricated value or an unexplained zero.
-
-## 10. API Design
-
-These are proposed production endpoints, not a requirement to build every endpoint in the initial prototype.
-
-### Risk
-
-- `GET /api/risk/zones`
-- `GET /api/risk/zones/:zoneId`
-- `GET /api/risk/assessments/:assessmentId`
-
-### Residue
-
-- `GET /api/residue`
-- `POST /api/residue`
-- `GET /api/residue/:residueId`
-- `PATCH /api/residue/:residueId`
-- `POST /api/residue/:residueId/verify`
-
-### Buyers and matching
-
-- `GET /api/buyers`
-- `GET /api/buyers/:buyerId`
-- `POST /api/matches/evaluate`
-- `GET /api/residue/:residueId/matches`
-
-### Transactions
-
-- `POST /api/transactions`
-- `GET /api/transactions`
-- `GET /api/transactions/:transactionId`
-- `POST /api/transactions/:transactionId/events`
-- `POST /api/transactions/:transactionId/measurements`
-
-### Impact
-
-- `GET /api/impact/summary`
-- `GET /api/impact/estimates/:estimateId`
-- `POST /api/impact/estimates`
-
-Production endpoints require schema validation, authorization, and consistent error responses.
-
-Example error response:
+Every dataset declares its status (`DATASET_METADATA` in `src/data/fixtures.ts`):
 
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Input did not pass validation.",
-    "details": []
-  }
+  "mode": "simulated",
+  "region": "Illustrative pilot region",
+  "asOf": "2026-11-10",
+  "warning": "All records are illustrative and not field-verified."
 }
 ```
 
-Never return stack traces or unnecessary personal data to clients.
+One shared fixture source feeds every screen. State is in-memory and resets on reload; persistence is a later phase. New records are marked `provenance: "simulated"`.
 
-## 11. Validation and Security
+## 10. Testing Strategy
 
-Before production use:
+Current phase: manual demo flow in Expo Go (see README demo flow).
 
-- Validate all numerical ranges and units.
-- Restrict string lengths and sanitize rendered user content.
-- Validate image type and size; scan uploads where supported.
-- Validate geographic coordinates.
-- Keep API secrets on the server.
-- Implement authentication and role-based authorization.
-- Restrict records by ownership and authorized region.
-- Obtain appropriate consent for personal information, photographs, and precise location.
-- Store sensitive assets privately.
-- Define data retention and deletion procedures.
-- Log sensitive changes without unnecessarily logging personal data.
-- Apply appropriate rate limits, secure headers, and CSRF protection for the chosen authentication pattern.
-- Do not expose farmer identity or exact field coordinates publicly without explicit authorization.
+Planned with the testing phase:
 
-## 12. Testing Strategy
+- **Unit (Jest):** economics math (including delivered-basis, negative nets, missing inputs), matching blockers, no-match, state-machine transitions, aggregations.
+- **Integration:** register → match → offer → accept → weigh → complete, asserting metric consistency.
+- **UI:** tab reachability, wizard validation messages, demo banner presence on every screen.
 
-### Unit tests
+## 11. Non-Functional Requirements
 
-- Unit conversions.
-- Gross value and cost calculations.
-- Partial and negative net estimates.
-- Buyer eligibility constraints.
-- No-match behavior.
-- Valid and invalid transaction transitions.
-- Provenance propagation.
-- Impact calculation with missing counterfactuals.
+- **Reliability:** identical inputs produce identical calculations.
+- **Usability:** the demo completes without manual data editing; registration under 3 minutes of active input.
+- **Performance:** cold start and tab switches remain smooth on entry-level Android hardware in Expo Go.
+- **Accessibility:** labeled controls, selected states, 44 pt targets, status never color-only, body text ≥ 14 pt.
+- **Maintainability:** domain logic isolated from UI and never duplicated across screens.
+- **Localization:** currency, dates, and units format through `src/lib/format.ts`; UI copy extraction is a later phase.
 
-### Integration tests
+## 12. Open Technical Decisions
 
-- Register residue.
-- Evaluate buyer candidates.
-- Create an offer.
-- Accept an offer.
-- Schedule pickup.
-- Record measured weight.
-- Update payment status.
-- Complete the demo transaction.
-- Confirm metrics reflect the correct status and quantity.
-
-### UI tests
-
-- All six modules load.
-- Invalid forms display clear errors.
-- Calculator values update consistently.
-- Search and filters behave correctly.
-- Empty, error, and no-match states are visible.
-- Demo labels persist across navigation.
-
-### Future model evaluation
-
-- Use temporal splits that prevent future information leaking into past predictions.
-- Test geographic generalization where data allows.
-- Report precision, recall, PR-AUC, calibration, and false-positive burden.
-- Compare a simple baseline with more complex models.
-- Do not use rule-generated labels as independent ground truth.
-- Define the target event and prediction horizon before training.
-
-## 13. Non-Functional Requirements
-
-- **Reliability:** identical inputs and method versions produce identical calculations.
-- **Usability:** the core demo can be completed without editing files manually.
-- **Accessibility:** keyboard navigation, visible focus, semantic labels, and readable contrast.
-- **Responsiveness:** desktop, tablet, and mobile layouts.
-- **Maintainability:** domain logic is separate from UI and not duplicated across pages.
-- **Auditability:** data sources, assumptions, and transaction changes are traceable.
-- **Privacy:** personal information is not collected before access and retention rules are established.
-- **Localization:** currency, dates, language, and units use shared formatting utilities.
-- **Performance:** targets are set after the real data volume and deployment environment are known.
-
-## 14. Demo Data Contract
-
-Every demo dataset must declare its status and scope:
-
-```json
-{
-  "metadata": {
-    "mode": "simulated",
-    "region": "Illustrative pilot region",
-    "asOf": "2026-10-15",
-    "warning": "All records are illustrative and not field-verified."
-  }
-}
-```
-
-Example risk record:
-
-```json
-{
-  "id": "ZONE-001",
-  "name": "Illustrative North Zone",
-  "riskScore": 0.83,
-  "riskBand": "elevated",
-  "provenance": "simulated",
-  "methodVersion": "demo-rules-v0"
-}
-```
-
-The score above is a UI fixture, not a measured probability of burning.
-
-Use one shared data source for all dashboard metrics, tables, and charts. Avoid embedding independent conflicting demo totals inside separate components.
-
-## 15. Implementation Phases
-
-### Phase A — Interactive prototype
-
-- Implement the six main modules.
-- Centralize demo fixtures.
-- Extract business calculations into domain functions.
-- Add validation and consistent simulated-data labels.
-- Implement transaction state transitions.
-- Test the end-to-end demo flow.
-
-### Phase B — Operational foundation
-
-- Add database migrations.
-- Add authentication and role-based access.
-- Add audit events and private file storage.
-- Add verification and buyer quote workflows.
-
-### Phase C — Data integration
-
-- Integrate suitable satellite, agricultural, and weather datasets.
-- Preserve data source, observation time, resolution, and freshness.
-- Establish independent event labels and local verification procedures.
-- Create repeatable ingestion and quality checks.
-
-### Phase D — Pilot validation
-
-- Evaluate predictions by time and geography.
-- Test buyer demand and logistics using real quotes.
-- Measure actual farmer proceeds and transaction completion.
-- Define a defensible counterfactual for environmental impact.
-- Review security, privacy, and effects on participating farmers.
-
-## 16. Open Technical Decisions
-
-- Map rendering library and basemap provider.
-- ORM selection.
-- Authentication provider and role model.
-- Private object storage.
-- Source and format of agricultural boundaries.
-- Satellite data ingestion schedule.
-- Independent labels for crop-residue burning.
-- Versioning for risk models and economic calculations.
-- Need for background workers after data volume and frequency are known.
+- Persistence layer for demo state (AsyncStorage vs. SQLite).
+- Test runner setup (Jest vs. Vitest in Expo context).
+- i18n framework and Bahasa Indonesia rollout plan.
+- Backend and authentication approach for the pilot phase.
+- Map rendering (operator screens only) and risk data ingestion.
+- Photo capture protocol and private storage.
+- Impact methodology (counterfactual + emission factors) before any environmental claim.
