@@ -1,68 +1,114 @@
 /**
  * StrawHub design tokens.
- * Farmer-first palette: readable in daylight, high contrast, green primary.
- * Status colors are always paired with a text label in the UI.
+ * Basis: AgroTech Precision / AquaCrop design system (v1.0.4 spec) —
+ * organic light scheme, editorial serif × modern sans, pill touchpoints.
+ * See design.md for the full rules.
  */
 
 export const Colors = {
-  light: {
-    background: '#F4F6F3',
-    surface: '#FFFFFF',
-    surfaceMuted: '#EDF1EC',
-    text: '#17211C',
-    textSecondary: '#57645D',
-    border: 'rgba(23,33,28,0.10)',
-    accent: '#1E7A4F',
-    accentMuted: '#E3F1E9',
-    warning: '#8A5A00',
-    warningMuted: '#FCF1D8',
-    danger: '#B3362B',
-    dangerMuted: '#FBE3E0',
-    info: '#205A8F',
-    infoMuted: '#E2EDF6',
-  },
-  dark: {
-    background: '#0D1311',
-    surface: '#151F1B',
-    surfaceMuted: '#1C2823',
-    text: '#E9EEEA',
-    textSecondary: '#9AA79F',
-    border: 'rgba(233,238,234,0.10)',
-    accent: '#4CC38A',
-    accentMuted: '#173226',
-    warning: '#F0C36B',
-    warningMuted: '#332A14',
-    danger: '#F0938A',
-    dangerMuted: '#361C19',
-    info: '#7EB3E8',
-    infoMuted: '#142431',
-  },
+  // Primary
+  forest: '#2F3E1E', // dark hero pill CTA, headers, active chips
+  forestDark: '#233016', // pressed forest
+  moss: '#5A7341', // banner alerts, positive badges, highlights
+  mossHover: '#4E6538', // pressed moss
+  leaf: '#7F9C57', // gauges, toggle fill, accents
+
+  // Surfaces
+  cream: '#F6F4ED', // main application screen background
+  creamLight: '#FAF8F2', // elevated light surface
+  creamDark: '#EFECE2', // inset fills, secondary chips
+
+  // Text
+  soil: '#1F2417', // headlines, primary metrics, strong labels
+  muted: '#697060', // secondary text, captions
+  hint: '#9BA193', // placeholders, timestamps
+
+  // Alert
+  coral: '#D97757', // warnings, alerts, blockers, negative values
+  coralSoft: '#FBF0EC', // warning fills, simulated-data notices
+
+  // Lines
+  sand: '#E6E3D8', // borders, dividers, inactive tracks
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+export type ThemeColor = keyof typeof Colors;
+
+/**
+ * Font families. Newsreader carries headings and metric values;
+ * Plus Jakarta Sans carries body, interface, and data labels.
+ * Loaded in src/app/_layout.tsx via @expo-google-fonts packages.
+ */
+export const Fonts = {
+  serif: {
+    regular: 'Newsreader_400Regular',
+    medium: 'Newsreader_500Medium',
+    semibold: 'Newsreader_600SemiBold',
+    italic: 'Newsreader_400Regular_Italic',
+    italicMedium: 'Newsreader_500Medium_Italic',
+  },
+  sans: {
+    regular: 'PlusJakartaSans_400Regular',
+    medium: 'PlusJakartaSans_500Medium',
+    semibold: 'PlusJakartaSans_600SemiBold',
+    bold: 'PlusJakartaSans_700Bold',
+  },
+} as const;
 
 export const Spacing = {
   xs: 4,
   sm: 8,
   md: 12,
   lg: 16,
-  xl: 24,
-  xxl: 32,
+  xl: 20,
+  xxl: 24,
+  xxxl: 32,
 } as const;
 
 export const Radius = {
-  sm: 6,
-  md: 10,
-  lg: 14,
-  pill: 999,
+  md: 16, // inner tiles, inputs, inset cards
+  lg: 24, // cards
+  pill: 9999, // buttons, badges, chips, segmented controls
 } as const;
 
+/** Serif headline / metric scale (Newsreader). */
 export const Typography = {
-  title: 24,
-  heading: 17,
-  body: 14,
-  caption: 12,
-  micro: 10,
+  display: 40, // display hero
+  headline: 28, // screen headline
+  title: 22, // card title
+  metric: 34, // large metric hero
+  value: 26, // telemetry / KPI value
+  subtitle: 18, // editorial italic subtitle
+  body: 14, // sans body UI
+  caption: 12, // sans caption
+  micro: 11, // sans micro eyebrow, uppercase
+} as const;
+
+/**
+ * Forest-tinted elevation, matching the sticker sheet shadows.
+ * iOS uses shadow*; Android uses elevation.
+ */
+export const Shadows = {
+  soft: {
+    shadowColor: '#2F3E1E',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  card: {
+    shadowColor: '#2F3E1E',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.07,
+    shadowRadius: 15,
+    elevation: 3,
+  },
+  float: {
+    shadowColor: '#2F3E1E',
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 6,
+  },
 } as const;
 
 export const MaxContentWidth = 720;

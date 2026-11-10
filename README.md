@@ -34,6 +34,8 @@ research, a backend, buyer/operator surfaces, and a pilot program are later phas
 
 - Expo SDK 58 · React Native 0.88 · React 19.3 · TypeScript (strict)
 - expo-router (file-based, typed routes) with bottom tabs
+- AgroTech design system: Newsreader serif × Plus Jakarta Sans,
+  organic earth-tone tokens, pill touchpoints (`design.md`)
 - React Context + reducer store — one shared data source for every screen
 - StyleSheet with centralized design tokens (`src/constants/theme.ts`)
 - Local JSON-style fixtures (`src/data/fixtures.ts`)

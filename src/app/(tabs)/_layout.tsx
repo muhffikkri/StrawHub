@@ -1,25 +1,29 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
+import { Colors, Fonts, Radius, Shadows, Spacing } from '@/constants/theme';
 import { useAppTheme } from '@/hooks/use-app-theme';
 
 /**
- * Tab labels carry plain words alongside visual weight — never rely on
- * an icon alone (design.md §7).
+ * Floating pill dock (design.md §6): translucent white pill, sand hairline,
+ * forest active state with a dot above the label. Plain-word labels —
+ * never icon-only.
  */
 function TabLabel({ children, focused }: { children: string; focused: boolean }) {
-  const { palette } = useAppTheme();
   return (
-    <Text
-      style={[
-        styles.tabLabel,
-        { color: focused ? palette.accent : palette.textSecondary },
-        focused && styles.tabLabelActive,
-      ]}
-    >
-      {children}
-    </Text>
+    <View style={styles.tabLabelWrap}>
+      {focused ? <View style={styles.tabDot} /> : null}
+      <Text
+        style={[
+          styles.tabLabel,
+          { color: focused ? Colors.forest : Colors.muted },
+          focused && styles.tabLabelActive,
+        ]}
+      >
+        {children}
+      </Text>
+    </View>
   );
 }
 
@@ -29,49 +33,52 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: palette.accent,
-        tabBarInactiveTintColor: palette.textSecondary,
-        tabBarStyle: {
-          backgroundColor: palette.surface,
-          borderTopColor: palette.border,
-        },
-        tabBarLabelStyle: styles.tabBarLabel,
+        tabBarActiveTintColor: Colors.forest,
+        tabBarInactiveTintColor: Colors.muted,
+        tabBarStyle: [
+          styles.dock,
+          {
+            backgroundColor: 'rgba(255,255,255,0.94)',
+            borderColor: palette.border,
+          },
+        ],
+        tabBarItemStyle: { borderRadius: Radius.pill },
+        tabBarLabel: ({ focused, children }) =>
+          typeof children === 'string' ? (
+            <TabLabel focused={focused}>{children}</TabLabel>
+          ) : null,
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarLabel: ({ focused }) => <TabLabel focused={focused}>Home</TabLabel>,
-        }}
-      />
-      <Tabs.Screen
-        name="registry"
-        options={{
-          title: 'Registry',
-          tabBarLabel: ({ focused }) => <TabLabel focused={focused}>Registry</TabLabel>,
-        }}
-      />
-      <Tabs.Screen
-        name="matches"
-        options={{
-          title: 'Matches',
-          tabBarLabel: ({ focused }) => <TabLabel focused={focused}>Matches</TabLabel>,
-        }}
-      />
-      <Tabs.Screen
-        name="transactions"
-        options={{
-          title: 'Transactions',
-          tabBarLabel: ({ focused }) => <TabLabel focused={focused}>Deals</TabLabel>,
-        }}
-      />
+      <Tabs.Screen name="index" options={{ title: 'Home' }} />
+      <Tabs.Screen name="registry" options={{ title: 'Registry' }} />
+      <Tabs.Screen name="matches" options={{ title: 'Matches' }} />
+      <Tabs.Screen name="transactions" options={{ title: 'Deals' }} />
     </Tabs>
   );
 }
 
 const styles = StyleSheet.create({
-  tabLabel: { fontSize: 11, fontWeight: '500' },
-  tabLabelActive: { fontWeight: '700' },
-  tabBarLabel: { marginTop: 2 },
+  dock: {
+    position: 'absolute',
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.sm + 2,
+    borderRadius: Radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    overflow: 'hidden',
+    ...Shadows.soft,
+  },
+  tabLabelWrap: { alignItems: 'center', paddingBottom: 2 },
+  tabDot: {
+    width: 5,
+    height: 5,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.forest,
+    marginBottom: 2,
+  },
+  tabLabel: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 11,
+  },
+  tabLabelActive: { fontFamily: Fonts.sans.bold },
 });

@@ -14,7 +14,7 @@ import {
   StatusBadge,
   VerificationBadge,
 } from '@/components/ui';
-import { Spacing, Typography } from '@/constants/theme';
+import { Fonts, Spacing, Typography } from '@/constants/theme';
 import { DEMO_FARMER } from '@/data/fixtures';
 import { activeDeals, summarizeOperations } from '@/domain/impact';
 import { useAppTheme } from '@/hooks/use-app-theme';
@@ -157,8 +157,8 @@ function residueLabel(type: string): string {
 
 const styles = StyleSheet.create({
   profileRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  profileName: { fontSize: Typography.heading, fontWeight: '700' },
-  profileZone: { fontSize: Typography.caption, marginTop: 2 },
+  profileName: { fontFamily: Fonts.serif.semibold, fontSize: Typography.title },
+  profileZone: { fontFamily: Fonts.sans.regular, fontSize: Typography.caption, marginTop: 2 },
   kpiRow: { flexDirection: 'row', gap: Spacing.sm },
   cardTitleRow: {
     flexDirection: 'row',
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.sm,
   },
-  cardTitle: { fontSize: Typography.body, fontWeight: '700', flex: 1 },
-  cardCaption: { fontSize: Typography.caption },
-  impactBody: { fontSize: Typography.body, lineHeight: 19 },
+  cardTitle: { fontFamily: Fonts.serif.semibold, fontSize: Typography.body + 2, flex: 1 },
+  cardCaption: { fontFamily: Fonts.sans.regular, fontSize: Typography.caption },
+  impactBody: { fontFamily: Fonts.sans.regular, fontSize: Typography.body, lineHeight: 19 },
 });

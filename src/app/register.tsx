@@ -10,7 +10,7 @@ import {
   Screen,
   SectionHeader,
 } from '@/components/ui';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { Fonts, Radius, Spacing, Typography } from '@/constants/theme';
 import { DEMO_FARMER } from '@/data/fixtures';
 import type {
   HandlingForm,
@@ -394,21 +394,22 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
     borderWidth: 1,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.sm + 2,
   },
-  chipText: { fontSize: Typography.caption, fontWeight: '600' },
+  chipText: { fontFamily: Fonts.sans.semibold, fontSize: Typography.caption },
   input: {
-    borderRadius: Radius.md,
+    borderRadius: Radius.pill,
     borderWidth: 1,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm + 2,
     fontSize: Typography.body,
+    fontFamily: Fonts.sans.regular,
   },
   inputRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   areaInput: { flex: 1 },
-  autoNote: { fontSize: Typography.caption, lineHeight: 16 },
+  autoNote: { fontFamily: Fonts.sans.regular, fontSize: Typography.caption, lineHeight: 16 },
   errorBox: { borderRadius: Radius.md, padding: Spacing.md, gap: 2 },
-  errorText: { fontSize: Typography.caption, fontWeight: '600' },
+  errorText: { fontFamily: Fonts.sans.semibold, fontSize: Typography.caption },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -423,6 +424,10 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     paddingVertical: 2,
   },
-  reviewLabel: { fontSize: Typography.body },
-  reviewValue: { fontSize: Typography.body, fontWeight: '600', textAlign: 'right' },
+  reviewLabel: { fontFamily: Fonts.sans.regular, fontSize: Typography.body },
+  reviewValue: {
+    fontFamily: Fonts.serif.medium,
+    fontSize: Typography.body,
+    textAlign: 'right',
+  },
 });

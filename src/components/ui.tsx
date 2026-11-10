@@ -1,7 +1,8 @@
 /**
- * Shared UI primitives.
+ * Shared UI primitives — AgroTech Precision / AquaCrop design language.
+ * Pill touchpoints, organic earth tones, serif headings × sans interface.
  * Status colors are always paired with a text label — color never
- * carries meaning alone.
+ * carries meaning alone. See design.md for the full rules.
  */
 
 import React from 'react';
@@ -17,7 +18,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { Colors, Fonts, Radius, Shadows, Spacing, Typography } from '@/constants/theme';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { Provenance, TransactionStatus, VerificationStatus } from '@/domain/types';
 import { TRANSACTION_STATUS_LABELS } from '@/domain/transactions';
@@ -65,7 +66,7 @@ export function Screen({
   );
 }
 
-/* ---------- Demo banner ---------- */
+/* ---------- Demo banner (coral soft) ---------- */
 
 export function DemoBanner() {
   const { palette } = useAppTheme();
@@ -79,24 +80,27 @@ export function DemoBanner() {
   );
 }
 
-/* ---------- Badge ---------- */
+/* ---------- Badge — pill system ---------- */
 
-export function Badge({
-  label,
-  tone,
-}: {
-  label: string;
-  tone: 'accent' | 'warning' | 'danger' | 'info' | 'neutral';
-}) {
-  const { palette } = useAppTheme();
-  const tones: Record<string, { fg: string; bg: string }> = {
-    accent: { fg: palette.accent, bg: palette.accentMuted },
-    warning: { fg: palette.warning, bg: palette.warningMuted },
-    danger: { fg: palette.danger, bg: palette.dangerMuted },
-    info: { fg: palette.info, bg: palette.infoMuted },
-    neutral: { fg: palette.textSecondary, bg: palette.surfaceMuted },
+export type BadgeTone = 'accent' | 'info' | 'warning' | 'danger' | 'neutral';
+
+/**
+ * Pill badges per the sticker sheet:
+ * - accent  → leaf tint, forest text (categorical / rule-based fit)
+ * - info    → solid moss, white text (positive, on-track, verified)
+ * - warning → coral soft fill, coral text (simulated, caution)
+ * - danger  → coral soft fill, coral text (alerts, failed constraints)
+ * - neutral → cream inset, soil text (neutral facts)
+ */
+export function Badge({ label, tone }: { label: string; tone: BadgeTone }) {
+  const stylesByTone: Record<BadgeTone, { fg: string; bg: string; solid?: boolean }> = {
+    accent: { fg: Colors.forest, bg: '#E5EBD9' },
+    info: { fg: '#FFFFFF', bg: Colors.moss, solid: true },
+    warning: { fg: Colors.coral, bg: Colors.coralSoft },
+    danger: { fg: Colors.coral, bg: Colors.coralSoft },
+    neutral: { fg: Colors.soil, bg: Colors.creamDark },
   };
-  const t = tones[tone];
+  const t = stylesByTone[tone];
   return (
     <View style={[styles.badge, { backgroundColor: t.bg }]}>
       <Text style={[styles.badgeText, { color: t.fg }]}>{label}</Text>
@@ -104,11 +108,14 @@ export function Badge({
   );
 }
 
-const PROVENANCE_LABEL: Record<Provenance, { label: string; tone: 'accent' | 'warning' | 'danger' | 'info' | 'neutral' }> = {
+const PROVENANCE_LABEL: Record<
+  Provenance,
+  { label: string; tone: BadgeTone }
+> = {
   simulated: { label: 'SIMULATED', tone: 'warning' },
-  observed: { label: 'OBSERVED', tone: 'info' },
+  observed: { label: 'OBSERVED', tone: 'neutral' },
   derived: { label: 'DERIVED', tone: 'neutral' },
-  verified: { label: 'VERIFIED', tone: 'accent' },
+  verified: { label: 'VERIFIED', tone: 'info' },
 };
 
 export function ProvenanceBadge({ provenance }: { provenance: Provenance }) {
@@ -125,15 +132,15 @@ const VERIFICATION_LABEL: Record<VerificationStatus, string> = {
 };
 
 export function VerificationBadge({ status }: { status: VerificationStatus }) {
-  const tone =
-    status === 'verified' ? 'accent' : status === 'rejected' ? 'danger' : 'warning';
+  const tone: BadgeTone =
+    status === 'verified' ? 'info' : status === 'rejected' ? 'danger' : 'warning';
   return <Badge label={VERIFICATION_LABEL[status]} tone={tone} />;
 }
 
 export function StatusBadge({ status }: { status: TransactionStatus }) {
-  const tone =
+  const tone: BadgeTone =
     status === 'completed'
-      ? 'accent'
+      ? 'info'
       : status === 'rejected' || status === 'cancelled' || status === 'disputed'
         ? 'danger'
         : status === 'needs_review'
@@ -142,7 +149,7 @@ export function StatusBadge({ status }: { status: TransactionStatus }) {
   return <Badge label={TRANSACTION_STATUS_LABELS[status]} tone={tone} />;
 }
 
-/* ---------- Card ---------- */
+/* ---------- Card — telemetry archetype ---------- */
 
 export function Card({
   children,
@@ -161,7 +168,7 @@ export function Card({
         style={({ pressed }) => [
           styles.card,
           { backgroundColor: palette.surface, borderColor: palette.border },
-          pressed && { opacity: 0.8 },
+          pressed && { opacity: 0.85 },
           style,
         ]}
       >
@@ -178,7 +185,7 @@ export function Card({
   );
 }
 
-/* ---------- KPI ---------- */
+/* ---------- KPI card — serif metric ---------- */
 
 export function KpiCard({
   label,
@@ -231,44 +238,73 @@ export function SectionHeader({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* ---------- Button ---------- */
+/* ---------- Buttons — pill touchpoints ---------- */
 
+/** Dark hero pill — forest fill, white text. */
 export function PrimaryButton({
   label,
   onPress,
   disabled,
-  tone = 'accent',
 }: {
   label: string;
   onPress: () => void;
   disabled?: boolean;
-  tone?: 'accent' | 'neutral' | 'danger';
 }) {
-  const { palette } = useAppTheme();
-  const bg =
-    tone === 'accent'
-      ? palette.accent
-      : tone === 'danger'
-        ? palette.danger
-        : palette.surfaceMuted;
-  const fg = tone === 'neutral' ? palette.text : '#FFFFFF';
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: disabled ? palette.surfaceMuted : bg },
-        pressed && { opacity: 0.85 },
+        Shadows.soft,
+        {
+          backgroundColor: disabled ? Colors.creamDark : pressed ? Colors.forestDark : Colors.forest,
+        },
       ]}
     >
-      <Text style={[styles.buttonText, { color: disabled ? palette.textSecondary : fg }]}>
+      <Text
+        style={[
+          styles.buttonText,
+          { color: disabled ? Colors.hint : '#FFFFFF' },
+        ]}
+      >
         {label}
       </Text>
     </Pressable>
   );
 }
 
+/** Cream outlined pill — alternative flows. */
+export function SecondaryButton({
+  label,
+  onPress,
+  disabled,
+}: {
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      style={({ pressed }) => [
+        styles.button,
+        {
+          backgroundColor: pressed ? 'rgba(230,227,216,0.6)' : Colors.cream,
+          borderColor: Colors.sand,
+          borderWidth: 1,
+        },
+      ]}
+    >
+      <Text style={[styles.buttonText, { color: disabled ? Colors.hint : Colors.soil }]}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+/** Text-only action. */
 export function GhostButton({
   label,
   onPress,
@@ -281,7 +317,12 @@ export function GhostButton({
   tone?: 'neutral' | 'danger' | 'accent';
 }) {
   const { palette } = useAppTheme();
-  const fg = tone === 'danger' ? palette.danger : tone === 'accent' ? palette.accent : palette.textSecondary;
+  const fg =
+    tone === 'danger'
+      ? palette.danger
+      : tone === 'accent'
+        ? palette.accent
+        : palette.textSecondary;
   return (
     <Pressable onPress={onPress} disabled={disabled} style={styles.ghostButton}>
       <Text style={[styles.ghostButtonText, { color: disabled ? palette.border : fg }]}>
@@ -320,56 +361,98 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
   },
-  title: { fontSize: Typography.title, fontWeight: '700' },
-  subtitle: { fontSize: Typography.caption, marginTop: 2 },
+  // Serif screen headline (design.md §4 serif scale)
+  title: {
+    fontFamily: Fonts.serif.medium,
+    fontSize: Typography.headline,
+    lineHeight: Typography.headline * 1.25,
+  },
+  subtitle: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: Typography.caption,
+    marginTop: 2,
+  },
   banner: {
     marginHorizontal: Spacing.lg,
     marginTop: Spacing.sm,
-    borderRadius: Radius.sm,
+    borderRadius: Radius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs + 2,
   },
-  bannerText: { fontSize: Typography.micro, fontWeight: '600', letterSpacing: 0.4 },
+  bannerText: {
+    fontFamily: Fonts.sans.semibold,
+    fontSize: Typography.micro,
+    letterSpacing: 0.4,
+  },
   badge: {
-    borderRadius: Radius.sm,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
+    borderRadius: Radius.pill,
+    paddingHorizontal: Spacing.sm + 2,
+    paddingVertical: 3,
     alignSelf: 'flex-start',
   },
-  badgeText: { fontSize: Typography.micro, fontWeight: '700', letterSpacing: 0.4 },
+  badgeText: {
+    fontFamily: Fonts.sans.semibold,
+    fontSize: Typography.micro,
+    letterSpacing: 0.3,
+  },
   card: {
     borderRadius: Radius.lg,
     borderWidth: StyleSheet.hairlineWidth,
     padding: Spacing.lg,
-    gap: Spacing.xs,
+    gap: Spacing.sm,
+    ...Shadows.card,
   },
-  kpiLabel: { fontSize: Typography.micro, fontWeight: '600', letterSpacing: 0.5, textTransform: 'uppercase' },
-  kpiValue: { fontSize: Typography.heading + 2, fontWeight: '700' },
-  kpiCaption: { fontSize: Typography.caption },
+  kpiLabel: {
+    fontFamily: Fonts.sans.semibold,
+    fontSize: Typography.micro,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  // Serif KPI value with tabular figures
+  kpiValue: {
+    fontFamily: Fonts.serif.semibold,
+    fontSize: Typography.value,
+    fontVariant: ['tabular-nums'],
+  },
+  kpiCaption: { fontFamily: Fonts.sans.regular, fontSize: Typography.caption },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: Spacing.md,
   },
-  rowLabel: { fontSize: Typography.body },
-  rowValue: { fontSize: Typography.body, fontWeight: '600', textAlign: 'right' },
+  rowLabel: { fontFamily: Fonts.sans.regular, fontSize: Typography.body },
+  rowValue: {
+    fontFamily: Fonts.sans.semibold,
+    fontSize: Typography.body,
+    textAlign: 'right',
+  },
   sectionHeader: {
+    fontFamily: Fonts.sans.semibold,
     fontSize: Typography.micro,
-    fontWeight: '700',
     letterSpacing: 0.6,
     textTransform: 'uppercase',
     marginTop: Spacing.sm,
   },
   button: {
-    borderRadius: Radius.md,
-    paddingVertical: Spacing.md,
+    borderRadius: Radius.pill,
+    paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  buttonText: { fontSize: Typography.body, fontWeight: '700' },
+  buttonText: { fontFamily: Fonts.sans.medium, fontSize: 15 },
   ghostButton: { paddingVertical: Spacing.sm, alignItems: 'center' },
-  ghostButtonText: { fontSize: Typography.body, fontWeight: '600' },
-  emptyTitle: { fontSize: Typography.heading, fontWeight: '700', textAlign: 'center' },
-  emptyBody: { fontSize: Typography.body, textAlign: 'center', marginTop: Spacing.xs },
+  ghostButtonText: { fontFamily: Fonts.sans.semibold, fontSize: Typography.body },
+  emptyTitle: {
+    fontFamily: Fonts.serif.semibold,
+    fontSize: Typography.title,
+    textAlign: 'center',
+  },
+  emptyBody: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: Typography.body,
+    textAlign: 'center',
+    marginTop: Spacing.xs,
+    lineHeight: 20,
+  },
 });

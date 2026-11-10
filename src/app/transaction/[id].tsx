@@ -13,7 +13,7 @@ import {
   SectionHeader,
   StatusBadge,
 } from '@/components/ui';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { Fonts, Radius, Spacing, Typography } from '@/constants/theme';
 import { nextStatuses, TRANSACTION_STATUS_LABELS } from '@/domain/transactions';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import { formatCurrencyIDR, formatDate, formatQuantity } from '@/lib/format';
@@ -203,15 +203,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.sm,
   },
-  demoNote: { fontSize: Typography.micro, fontWeight: '600', textAlign: 'right' },
+  demoNote: { fontFamily: Fonts.sans.semibold, fontSize: Typography.micro, textAlign: 'right' },
   input: {
-    borderRadius: Radius.md,
+    borderRadius: Radius.pill,
     borderWidth: 1,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm + 2,
     fontSize: Typography.body,
+    fontFamily: Fonts.sans.regular,
   },
-  note: { fontSize: Typography.caption, lineHeight: 16 },
-  eventTitle: { fontSize: Typography.body, fontWeight: '700', flex: 1 },
-  eventDate: { fontSize: Typography.caption },
+  note: { fontFamily: Fonts.sans.regular, fontSize: Typography.caption, lineHeight: 16 },
+  eventTitle: { fontFamily: Fonts.serif.semibold, fontSize: Typography.body, flex: 1 },
+  eventDate: { fontFamily: Fonts.sans.regular, fontSize: Typography.caption },
 });

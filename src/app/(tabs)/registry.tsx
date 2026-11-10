@@ -12,7 +12,7 @@ import {
   SectionHeader,
   VerificationBadge,
 } from '@/components/ui';
-import { Typography } from '@/constants/theme';
+import { Fonts, Typography } from '@/constants/theme';
 import type { ResidueRecord } from '@/domain/types';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import { formatDate, formatQuantity } from '@/lib/format';
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  title: { fontSize: Typography.body, fontWeight: '700', flex: 1 },
-  methodNote: { fontSize: Typography.caption, lineHeight: 16 },
-  note: { fontSize: Typography.body, lineHeight: 19 },
+  title: { fontFamily: Fonts.serif.semibold, fontSize: Typography.body + 2, flex: 1 },
+  methodNote: { fontFamily: Fonts.sans.regular, fontSize: Typography.caption, lineHeight: 16 },
+  note: { fontFamily: Fonts.sans.regular, fontSize: Typography.body, lineHeight: 19 },
 });

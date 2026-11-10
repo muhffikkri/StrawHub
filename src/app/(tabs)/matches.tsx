@@ -12,7 +12,7 @@ import {
   Screen,
   SectionHeader,
 } from '@/components/ui';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { Fonts, Radius, Spacing, Typography } from '@/constants/theme';
 import { findMatches } from '@/domain/matching';
 import type { ResidueRecord } from '@/domain/types';
 import { useAppTheme } from '@/hooks/use-app-theme';
@@ -20,7 +20,7 @@ import { formatCurrencyIDR, formatQuantity } from '@/lib/format';
 import { useDemo } from '@/store/demo-store';
 
 export default function MatchesScreen() {
-  const { palette } = useAppTheme();
+  const { palette, brand } = useAppTheme();
   const { residue, buyers, createOffer } = useDemo();
   const params = useLocalSearchParams<{ recordId?: string }>();
 
@@ -147,7 +147,7 @@ export default function MatchesScreen() {
                 value={formatCurrencyIDR(economics.indicativeNetProceeds)}
                 valueStyle={{
                   color:
-                    economics.indicativeNetProceeds < 0 ? palette.danger : palette.accent,
+                    economics.indicativeNetProceeds < 0 ? palette.danger : brand.moss,
                 }}
               />
               <Text style={[styles.assumption, { color: palette.textSecondary }]}>
@@ -220,19 +220,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
   },
-  chipText: { fontSize: Typography.caption, fontWeight: '600' },
+  chipText: { fontFamily: Fonts.sans.semibold, fontSize: Typography.caption },
   titleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: Spacing.sm,
   },
-  buyerName: { fontSize: Typography.body, fontWeight: '700', flex: 1 },
-  buyerType: { fontSize: Typography.caption },
+  buyerName: { fontFamily: Fonts.serif.semibold, fontSize: Typography.body + 2, flex: 1 },
+  buyerType: { fontFamily: Fonts.sans.regular, fontSize: Typography.caption },
   blockerBox: { gap: 2, marginTop: Spacing.xs },
-  blocker: { fontSize: Typography.caption, fontWeight: '600' },
-  noMatchTitle: { fontSize: Typography.heading, fontWeight: '700', marginTop: Spacing.xs },
-  noMatchBody: { fontSize: Typography.body, lineHeight: 19, marginTop: Spacing.xs },
-  assumption: { fontSize: Typography.caption, lineHeight: 16 },
-  note: { fontSize: Typography.body, lineHeight: 19 },
+  blocker: { fontFamily: Fonts.sans.semibold, fontSize: Typography.caption },
+  noMatchTitle: {
+    fontFamily: Fonts.serif.semibold,
+    fontSize: Typography.subtitle,
+    marginTop: Spacing.xs,
+  },
+  noMatchBody: { fontFamily: Fonts.sans.regular, fontSize: Typography.body, lineHeight: 19, marginTop: Spacing.xs },
+  assumption: { fontFamily: Fonts.sans.regular, fontSize: Typography.caption, lineHeight: 16 },
+  note: { fontFamily: Fonts.sans.regular, fontSize: Typography.body, lineHeight: 19 },
 });

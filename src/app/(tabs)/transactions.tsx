@@ -10,7 +10,7 @@ import {
   SectionHeader,
   StatusBadge,
 } from '@/components/ui';
-import { Typography } from '@/constants/theme';
+import { Fonts, Typography } from '@/constants/theme';
 import { activeDeals } from '@/domain/impact';
 import { isTerminal } from '@/domain/transactions';
 import { useAppTheme } from '@/hooks/use-app-theme';
@@ -109,7 +109,7 @@ function residueLabel(type?: string): string {
 
 const styles = StyleSheet.create({
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
-  title: { fontSize: Typography.body, fontWeight: '700', flex: 1 },
-  caption: { fontSize: Typography.caption },
-  note: { fontSize: Typography.body, lineHeight: 19 },
+  title: { fontFamily: Fonts.serif.semibold, fontSize: Typography.body + 2, flex: 1 },
+  caption: { fontFamily: Fonts.sans.regular, fontSize: Typography.caption },
+  note: { fontFamily: Fonts.sans.regular, fontSize: Typography.body, lineHeight: 19 },
 });

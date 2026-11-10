@@ -53,7 +53,8 @@ The initial implementation demonstrates a credible farmer-facing workflow withou
 | Language | TypeScript (strict) |
 | Navigation | expo-router (file-based, typed routes) |
 | State | React Context + reducer (`src/store/demo-store.tsx`) |
-| Styling | StyleSheet with centralized tokens (`src/constants/theme.ts`) |
+| Styling | StyleSheet with centralized tokens (`src/constants/theme.ts`) — AgroTech design system (design.md) |
+| Typography | Newsreader (serif headings/values) × Plus Jakarta Sans (body/UI) via `@expo-google-fonts` |
 | Data | Local fixtures (`src/data/fixtures.ts`) |
 | Formatting | `Intl` via shared helpers (`src/lib/format.ts`) |
 

@@ -8,7 +8,7 @@ import {
   Screen,
   SectionHeader,
 } from '@/components/ui';
-import { Typography } from '@/constants/theme';
+import { Fonts, Typography } from '@/constants/theme';
 import { DATASET_METADATA } from '@/data/fixtures';
 import { summarizeOperations } from '@/domain/impact';
 import { useAppTheme } from '@/hooks/use-app-theme';
@@ -73,6 +73,6 @@ export default function ImpactScreen() {
 
 const styles = StyleSheet.create({
   kpiRow: { flexDirection: 'row', gap: 8 },
-  body: { fontSize: Typography.body, fontWeight: '600' },
-  caption: { fontSize: Typography.caption, lineHeight: 16 },
+  body: { fontFamily: Fonts.sans.semibold, fontSize: Typography.body },
+  caption: { fontFamily: Fonts.sans.regular, fontSize: Typography.caption, lineHeight: 16 },
 });
