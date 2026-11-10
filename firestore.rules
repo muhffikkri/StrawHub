@@ -1,0 +1,48 @@
+rules_version = '2';
+
+// StrawHub — Firestore security rules.
+//
+// Every user record is owner-scoped: a user can only read and write documents
+// whose `ownerId` matches their Firebase Auth uid.
+//
+// `buyers` is a shared catalog. Clients may create buyer documents so the
+// demo dataset can seed itself on first sign-in (prototype only), but the
+// catalog is read-only afterwards. Production replaces this with admin writes.
+//
+// Deploy: npx firebase-tools@latest deploy --only firestore:rules
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    match /buyers/{buyerId} {
+      allow read: if request.auth != null;
+      // First-run demo seeding only; buyer docs are immutable afterwards.
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll(['id', 'name', 'buyerType', 'requirement']);
+      allow update, delete: if false;
+    }
+
+    match /residueRecords/{recordId} {
+      allow read, update, delete: if isOwner(resource.data.ownerId);
+      allow create: if isOwner(request.resource.data.ownerId);
+    }
+
+    match /transactions/{transactionId} {
+      allow read, update, delete: if isOwner(resource.data.ownerId);
+      allow create: if isOwner(request.resource.data.ownerId);
+    }
+
+    match /transactionEvents/{eventId} {
+      allow read, update, delete: if isOwner(resource.data.ownerId);
+      allow create: if isOwner(request.resource.data.ownerId);
+    }
+
+    function isOwner(ownerId) {
+      return request.auth != null && request.auth.uid == ownerId;
+    }
+  }
+}

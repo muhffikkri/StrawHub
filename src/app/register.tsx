@@ -11,6 +11,8 @@ import {
   SectionHeader,
 } from '@/components/ui';
 import { Fonts, Radius, Spacing, Typography } from '@/constants/theme';
+import { useAuth } from '@/store/auth-store';
+
 import { DEMO_FARMER } from '@/data/fixtures';
 import type {
   HandlingForm,
@@ -54,6 +56,7 @@ function isValidISODate(value: string): boolean {
 export default function RegisterScreen() {
   const { palette } = useAppTheme();
   const { addResidue } = useDemo();
+  const { user } = useAuth();
 
   const [step, setStep] = useState(1);
 
@@ -123,7 +126,7 @@ export default function RegisterScreen() {
       return;
     }
     addResidue({
-      farmerName: DEMO_FARMER.name,
+      farmerName: user?.displayName || DEMO_FARMER.name,
       zone: DEMO_FARMER.zone,
       residueType,
       fieldAreaValue: Number(fieldAreaValue),

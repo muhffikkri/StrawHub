@@ -3,17 +3,18 @@
 Phased plan from the current mobile prototype to a field-pilotable product.
 Each phase has a goal, scope, exit criteria, and explicit out-of-scope items.
 
-**Current status: Phase 1 complete.**
+**Current status: Phase 1 complete.** Google Sign-In and Firestore real-time sync
+were pulled forward from Phases 2/5 as a prototype integration (see notes there).
 
 ## Phase Overview
 
 | Phase | Name | Goal | Status |
 | --- | --- | --- | --- |
 | 1 | Mobile prototype | Farmer journey works in Expo Go on simulated data | ✅ Done |
-| 2 | Local persistence & offline UX | Data survives restarts; read screens work offline | Planned |
+| 2 | Local persistence & offline UX | Data survives restarts; read screens work offline | ⚗️ Auth + cloud sync done |
 | 3 | Testing & quality | Domain logic covered by unit/integration tests | Planned |
 | 4 | Local market research | Replace simulated buyers with verified local demand | Planned |
-| 5 | Backend & accounts | Real data model, auth, farmer identity | Planned |
+| 5 | Backend & accounts | Real data model, auth, farmer identity | ⚗️ Auth + Firestore prototype |
 | 6 | Buyer & operator surfaces | Buyer app section; operator web dashboard | Planned |
 | 7 | Pilot program | First real transactions in one region | Planned |
 | 8 | Impact methodology | Defensible environmental claims | Planned |
@@ -39,15 +40,20 @@ Each phase has a goal, scope, exit criteria, and explicit out-of-scope items.
 
 **Goal:** demo state survives app restarts; read screens tolerate no connectivity.
 
-- Persist store to AsyncStorage (hydrate on launch, save on mutation).
+- ✅ Auth session persists in AsyncStorage; an active token bypasses the login
+  screen on restart. Profile snapshot stored under `strawhub.session.profile`.
+- ✅ Firestore real-time sync (owner-scoped) when signed in; local fixtures in
+  demo mode.
 - Draft persistence for the registration wizard across app restarts.
-- Reset-demo-data restores fixtures cleanly.
-- Handle loading and error states for the persisted store.
+- Reset-demo-data restores fixtures cleanly (✅ local + cloud re-seed).
+- Handle loading and error states for the persisted store (⚠️ partial: login
+  errors only).
 - Performance pass on low-end Android (cold start, list rendering).
 
 **Exit criteria:** kill and reopen the app mid-registration; the draft is intact and completed records persist.
 
-**Out of scope:** any network API.
+**Out of scope:** production offline queueing, conflict resolution for concurrent
+edits, and background sync.
 
 ## Phase 3 — Testing & Quality
 
@@ -80,7 +86,11 @@ Each phase has a goal, scope, exit criteria, and explicit out-of-scope items.
 
 **Goal:** real data beyond one device.
 
-- Data model migration: SQLite/PostgreSQL persistence mirroring `src/domain/types.ts`.
+- ⚗️ Prototype delivered early: Firebase Authentication (Google Sign-In),
+  owner-scoped Firestore collections mirroring `src/domain/types.ts`, and
+  real-time sync in the app.
+- Production decisions still open: SQLite/PostgreSQL vs Firestore as the long-term
+  store, phone-number OTP for farmers without Google accounts.
 - Farmer accounts (phone-number OTP), role-based access (farmer, buyer, operator).
 - API with schema validation (Zod-style), consistent errors, audit events.
 - Private photo storage with consent flow.

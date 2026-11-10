@@ -3,6 +3,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import {
+  Badge,
   Card,
   EmptyState,
   GhostButton,
@@ -14,33 +15,53 @@ import {
   StatusBadge,
   VerificationBadge,
 } from '@/components/ui';
-import { Fonts, Spacing, Typography } from '@/constants/theme';
-import { DEMO_FARMER } from '@/data/fixtures';
+import { Fonts, Radius, Spacing, Typography } from '@/constants/theme';
 import { activeDeals, summarizeOperations } from '@/domain/impact';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import { formatQuantity } from '@/lib/format';
+import { useAuth } from '@/store/auth-store';
 import { useDemo } from '@/store/demo-store';
+
+function initials(name: string): string {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('');
+}
 
 export default function HomeScreen() {
   const { palette } = useAppTheme();
-  const { residue, transactions, buyers, reset } = useDemo();
+  const { residue, transactions, buyers, cloudMode, reset } = useDemo();
+  const { user, signOut } = useAuth();
 
   const summary = summarizeOperations(residue, transactions);
   const active = activeDeals(transactions);
+  const displayName = user?.displayName ?? 'Farmer';
 
   return (
-    <Screen title="StrawHub" subtitle="Jerami Jadi Rupiah">
+    <Screen title={`Welcome back, ${displayName.split(' ')[0]}`} subtitle="Jerami Jadi Rupiah">
       <Card>
         <View style={styles.profileRow}>
-          <View>
-            <Text style={[styles.profileName, { color: palette.text }]}>
-              {DEMO_FARMER.name}
-            </Text>
-            <Text style={[styles.profileZone, { color: palette.textSecondary }]}>
-              {DEMO_FARMER.zone} · demo profile
-            </Text>
+          <View style={styles.profileIdentity}>
+            <View style={[styles.avatar, { backgroundColor: palette.accentMuted }]}>
+              <Text style={[styles.avatarText, { color: palette.accent }]}>
+                {initials(displayName)}
+              </Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.profileName, { color: palette.text }]} numberOfLines={1}>
+                {displayName}
+              </Text>
+              <Text style={[styles.profileZone, { color: palette.textSecondary }]} numberOfLines={1}>
+                {user?.email ?? 'Demo profile'}
+              </Text>
+            </View>
           </View>
+          <Badge label={cloudMode ? 'FIRESTORE' : 'LOCAL'} tone={cloudMode ? 'info' : 'neutral'} />
         </View>
+        <GhostButton label="Sign out" tone="danger" onPress={signOut} />
       </Card>
 
       <PrimaryButton label="Register residue" onPress={() => router.push('/register')} />
@@ -107,7 +128,11 @@ export default function HomeScreen() {
         active.map((t) => {
           const buyer = buyers.find((b) => b.id === t.buyerId);
           return (
-            <Link key={t.id} href={{ pathname: `/transaction/${t.id}` }} asChild>
+            <Link
+              key={t.id}
+              href={{ pathname: '/transaction/[id]', params: { id: t.id } }}
+              asChild
+            >
               <Card>
                 <View style={styles.cardTitleRow}>
                   <Text style={[styles.cardTitle, { color: palette.text }]}>
@@ -156,7 +181,16 @@ function residueLabel(type: string): string {
 }
 
 const styles = StyleSheet.create({
-  profileRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  profileRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.sm },
+  profileIdentity: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, flex: 1 },
+  avatar: {
+    width: 42,
+    height: 42,
+    borderRadius: Radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: { fontFamily: Fonts.sans.bold, fontSize: Typography.body },
   profileName: { fontFamily: Fonts.serif.semibold, fontSize: Typography.title },
   profileZone: { fontFamily: Fonts.sans.regular, fontSize: Typography.caption, marginTop: 2 },
   kpiRow: { flexDirection: 'row', gap: Spacing.sm },

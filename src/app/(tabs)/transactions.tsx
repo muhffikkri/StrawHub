@@ -28,7 +28,11 @@ export default function TransactionsScreen() {
     const buyer = buyers.find((b) => b.id === t.buyerId);
     const record = residue.find((r) => r.id === t.residueRecordId);
     return (
-      <Link key={t.id} href={{ pathname: `/transaction/${t.id}` }} asChild>
+      <Link
+        key={t.id}
+        href={{ pathname: '/transaction/[id]', params: { id: t.id } }}
+        asChild
+      >
         <Card>
           <View style={styles.titleRow}>
             <Text style={[styles.title, { color: palette.text }]}>

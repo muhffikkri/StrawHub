@@ -21,6 +21,7 @@ import {
 import React, { useEffect } from 'react';
 
 import { Colors, Fonts } from '@/constants/theme';
+import { useAuth, AuthProvider } from '@/store/auth-store';
 import { DemoProvider } from '@/store/demo-store';
 
 export const unstable_settings = {
@@ -43,6 +44,22 @@ const OrganicTheme = {
 };
 
 export default function RootLayout() {
+  return (
+    <ThemeProvider value={OrganicTheme}>
+      <AuthProvider>
+        <RootNavigator />
+      </AuthProvider>
+    </ThemeProvider>
+  );
+}
+
+/**
+ * Route gate: an active session (restored from local storage) bypasses the
+ * login screen; a signed-out user can only reach /login.
+ */
+function RootNavigator() {
+  const { user, loading } = useAuth();
+
   const [fontsLoaded] = useFonts({
     [Fonts.serif.regular]: Newsreader_400Regular,
     [Fonts.serif.medium]: Newsreader_500Medium,
@@ -55,31 +72,36 @@ export default function RootLayout() {
     [Fonts.sans.bold]: PlusJakartaSans_700Bold,
   });
 
+  const ready = fontsLoaded && !loading;
+
   useEffect(() => {
-    if (fontsLoaded) {
+    if (ready) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded]);
+  }, [ready]);
 
-  if (!fontsLoaded) {
+  if (!ready) {
     return null;
   }
 
   return (
-    <ThemeProvider value={OrganicTheme}>
-      <DemoProvider>
-        <Stack
-          screenOptions={{
-            headerBackTitle: 'Back',
-            headerTitleStyle: { fontFamily: Fonts.serif.medium },
-          }}
-        >
+    <DemoProvider>
+      <Stack
+        screenOptions={{
+          headerBackTitle: 'Back',
+          headerTitleStyle: { fontFamily: Fonts.serif.medium },
+        }}
+      >
+        <Stack.Protected guard={!!user} redirectTo="/login">
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="register" options={{ title: 'Register Residue' }} />
           <Stack.Screen name="impact" options={{ title: 'Impact & Evidence' }} />
           <Stack.Screen name="transaction/[id]" options={{ title: 'Transaction' }} />
-        </Stack>
-      </DemoProvider>
-    </ThemeProvider>
+        </Stack.Protected>
+        <Stack.Protected guard={!user} redirectTo="/">
+          <Stack.Screen name="login" options={{ headerShown: false }} />
+        </Stack.Protected>
+      </Stack>
+    </DemoProvider>
   );
 }

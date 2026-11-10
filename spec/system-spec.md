@@ -17,6 +17,10 @@ The initial implementation demonstrates a credible farmer-facing workflow withou
 ### In scope for the mobile prototype
 
 - Tab navigation: Home, Registry, Matches, Deals.
+- Google Sign-In via Firebase Authentication (Expo Go compatible), persisted
+  session, demo-profile fallback when Firebase is not configured.
+- Firestore real-time sync of owner-scoped collections (`src/lib/firestore.ts`),
+  auto-seeded dummy dataset per account.
 - Residue registration wizard (3 steps, validated).
 - Rule-based buyer matching with blockers.
 - Shared economics calculation.
@@ -27,23 +31,26 @@ The initial implementation demonstrates a credible farmer-facing workflow withou
 
 ### Out of scope for the mobile prototype
 
-- Backend, accounts, and authentication.
+- Production identity program (phone OTP, roles, consent flows).
 - Real buyer quotations or integrations.
 - Payment processing.
 - Live truck dispatch or logistics scheduling.
 - Satellite risk intelligence (operator surfaces, later phases).
 - Verified avoided-emission reporting.
-- Push notifications, camera capture, offline persistence.
+- Push notifications, camera capture, offline write queueing.
 
 ## 3. Architecture Principles
 
 1. One Expo app; domain logic stays plain TypeScript with no React Native imports.
 2. State is managed centrally (one Context store) so screens cannot disagree.
+   Firestore is the source of truth in cloud mode; snapshots hydrate the store.
 3. Provenance and verification status travel with every record.
 4. Never force an uneconomic buyer match.
 5. All financial calculations reproducible through one function.
-6. Demo fixtures stay explicitly separate from future production data.
-7. Prefer Expo Go–compatible dependencies until a development build is justified.
+6. Demo fixtures stay explicitly separate from future production data; every
+   cloud record carries `ownerId` and is guarded by `firestore.rules`.
+7. Prefer Expo Go–compatible dependencies until a development build is justified
+   — Firebase JS SDK plus `expo-auth-session`, never `@react-native-firebase/*`.
 
 ## 4. Technology Stack
 
@@ -53,12 +60,16 @@ The initial implementation demonstrates a credible farmer-facing workflow withou
 | Language | TypeScript (strict) |
 | Navigation | expo-router (file-based, typed routes) |
 | State | React Context + reducer (`src/store/demo-store.tsx`) |
+| Auth | Firebase Authentication + `expo-auth-session` Google provider (`src/store/auth-store.tsx`) |
 | Styling | StyleSheet with centralized tokens (`src/constants/theme.ts`) — AgroTech design system (design.md) |
 | Typography | Newsreader (serif headings/values) × Plus Jakarta Sans (body/UI) via `@expo-google-fonts` |
-| Data | Local fixtures (`src/data/fixtures.ts`) |
+| Data | Firestore (cloud mode) or local fixtures (`src/data/fixtures.ts`) in demo mode |
+| Local storage | `@react-native-async-storage/async-storage` — session persistence + profile snapshot |
 | Formatting | `Intl` via shared helpers (`src/lib/format.ts`) |
 
-Planned (later phases): Jest unit tests for the domain layer, AsyncStorage persistence, i18n, camera via `expo-image-picker`, push notifications, and a backend service.
+Planned (later phases): Jest unit tests for the domain layer, draft persistence,
+offline write queueing, i18n, camera via `expo-image-picker`, push notifications,
+and production backend endpoints.
 
 ## 5. Directory Structure
 
@@ -68,7 +79,8 @@ strawhub/
 ├── assets/
 ├── src/
 │   ├── app/                      # expo-router routes
-│   │   ├── _layout.tsx           # root stack + DemoProvider
+│   │   ├── _layout.tsx           # AuthProvider + DemoProvider + route guard
+│   │   ├── login.tsx             # Google Sign-In / demo profile
 │   │   ├── (tabs)/
 │   │   │   ├── _layout.tsx       # bottom tabs
 │   │   │   ├── index.tsx         # Home
@@ -88,8 +100,15 @@ strawhub/
 │   │   └── impact.ts
 │   ├── data/fixtures.ts          # simulated dataset + metadata
 │   ├── hooks/use-app-theme.ts
-│   ├── lib/format.ts
-│   └── store/demo-store.tsx
+│   ├── lib/
+│   │   ├── format.ts
+│   │   ├── firebase.ts           # app/auth/firestore bootstrap, env config
+│   │   └── firestore.ts          # subscriptions, seeding, owner-scoped writes
+│   └── store/
+│       ├── auth-store.tsx        # Firebase session + profile persistence
+│       └── demo-store.tsx        # local reducer + cloud-aware mutations
+├── firestore.rules               # owner-scoped security rules
+├── scripts/seed-firestore.mjs    # Admin SDK dummy-data seeder
 ├── PRD.md
 ├── design.md
 ├── ROADMAP.md
@@ -152,6 +171,25 @@ Controlled vocabularies: `ResidueType`, `ResidueCondition`, `HandlingForm`, `Tra
 
 These are separate axes. A derived value can still need review; an observed value is not automatically verified.
 
+### Cloud persistence (prototype)
+
+Firestore collections mirror the domain types; dates are ISO strings and every
+document carries `ownerId` (the Firebase Auth uid):
+
+| Collection | Contents |
+| --- | --- |
+| `users/{uid}` | profile snapshot (`displayName`, `email`, `photoURL`), seed bookkeeping |
+| `buyers/{id}` | shared buyer catalog, admin-seeded, read-only to clients |
+| `residueRecords/{id}` | ResidueRecord + `ownerId` |
+| `transactions/{id}` | Transaction + `ownerId` |
+| `transactionEvents/{id}` | TransactionEvent + `ownerId` |
+
+On first sign-in the account is seeded with the demo dataset. Cloud mode treats
+Firestore as the source of truth: mutations are optimistic local dispatches plus
+a write with identical ids, and `onSnapshot` reconciliation replaces state.
+`firestore.rules` restricts reads/writes to documents whose `ownerId` matches
+the caller's uid.
+
 ## 8. Business Rules
 
 1. Quantity must be positive with an explicit unit; estimates carry a visible method.
@@ -162,6 +200,8 @@ These are separate axes. A derived value can still need review; an observed valu
 6. Measured weight never overwrites the estimate; both remain visible.
 7. Demo completion never implies real payment.
 8. Collected mass ≠ diverted mass; avoided emissions require a documented counterfactual — render “Not estimated” otherwise.
+9. Cloud data is owner-scoped: a user reads and writes only documents whose
+   `ownerId` equals their uid; buyers are read-only to clients.
 
 ## 9. Demo Data Contract
 
