@@ -24,8 +24,10 @@ import { Colors, Fonts } from '@/constants/theme';
 import { useAuth, AuthProvider } from '@/store/auth-store';
 import { DemoProvider } from '@/store/demo-store';
 
+import * as WebBrowser from 'expo-web-browser';
+
 export const unstable_settings = {
-  initialRouteName: '(tabs)',
+  anchor: '(tabs)',
 };
 
 SplashScreen.preventAutoHideAsync();
@@ -44,6 +46,13 @@ const OrganicTheme = {
 };
 
 export default function RootLayout() {
+  // Complete the OAuth exchange when Google redirects the popup back to our
+  // own URL (the popup boots our app fresh — it does not land on /login).
+  // No-op when no session is in progress, so safe on every mount.
+  useEffect(() => {
+    WebBrowser.maybeCompleteAuthSession();
+  }, []);
+
   return (
     <ThemeProvider value={OrganicTheme}>
       <AuthProvider>

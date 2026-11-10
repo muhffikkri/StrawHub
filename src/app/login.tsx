@@ -5,9 +5,12 @@
  * centered brand mark, serif display headline, white hero pill.
  * A demo profile keeps the prototype usable without Firebase config.
  *
- * The Google request hook lives in `GoogleSignInButton`, mounted only when a
- * client ID is configured: the hook throws without one, including during the
- * Expo Router web server render.
+ * Google OAuth runs through expo-auth-session. The route guard
+ * (Stack.Protected in _layout.tsx) redirects to the home stack
+ * once the user session is restored from persistence.
+ *
+ * ⚠️ No window.close() is called — modern browsers (COOP/COEP) block it.
+ * The popup closes automatically after the OAuth exchange completes.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -89,11 +92,15 @@ function GoogleSignInButton() {
     webClientId: GOOGLE_WEB_CLIENT_ID,
     selectAccount: true,
   });
+
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Exchange the Google ID token for a Firebase session.
-  // State updates happen in the async continuation, never in the effect body.
+  // The route guard (Stack.Protected in _layout.tsx) will re-evaluate and
+  // redirect to the home stack ((tabs)) once the user state is updated by
+  // onAuthStateChanged. We do NOT call window.close() — modern browsers
+  // (COOP/COEP) block it.
   useEffect(() => {
     if (!response || response.type !== 'success') return;
     const idToken = response.params?.id_token;
@@ -106,6 +113,8 @@ function GoogleSignInButton() {
           : 'Firebase sign-in failed.'
       );
     });
+    // No window management here — the browser handles the popup lifecycle,
+    // and the route guard handles the navigation redirect.
   }, [response, signInWithGoogleIdToken]);
 
   // A failed OAuth round-trip is derived from the response, not stored.
