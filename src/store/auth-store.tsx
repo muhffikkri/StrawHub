@@ -10,10 +10,14 @@
  *   `strawhub.session.profile` (local storage) for quick reads.
  * - Without Firebase env config the store falls back to a demo profile
  *   so the prototype keeps working offline.
+ *
+ * The Google auth request hook lives on the login screen, mounted only when a
+ * client ID exists — it throws without one, including during web SSR.
  */
 
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -21,7 +25,6 @@ import React, {
   type ReactNode,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useIdTokenAuthRequest } from 'expo-auth-session/providers/google';
 import {
   GoogleAuthProvider,
   onAuthStateChanged,
@@ -31,7 +34,7 @@ import {
 } from 'firebase/auth';
 
 import { ensureUserWorkspace } from '@/lib/firestore';
-import { auth, GOOGLE_WEB_CLIENT_ID, isFirebaseConfigured } from '@/lib/firebase';
+import { auth, isFirebaseConfigured } from '@/lib/firebase';
 
 export const PROFILE_STORAGE_KEY = 'strawhub.session.profile';
 
@@ -48,12 +51,10 @@ interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
   isFirebaseConfigured: boolean;
-  /** True when the Google OAuth request is ready to be prompted. */
-  googleReady: boolean;
-  signInWithGoogle: () => Promise<void>;
+  /** Exchanges a Google ID token (from expo-auth-session) for a Firebase session. */
+  signInWithGoogleIdToken: (idToken: string) => Promise<void>;
   signInDemo: () => Promise<void>;
   signOut: () => Promise<void>;
-  lastError: string | null;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -105,13 +106,14 @@ async function readProfile(): Promise<AuthUser | null> {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // Called unconditionally (hooks rules); request stays null without a client id.
-  const [googleRequest, googleResponse, promptGoogle] = useIdTokenAuthRequest({
-    clientId: GOOGLE_WEB_CLIENT_ID || undefined,
-    selectAccount: true,
-  });
+  /** Stable: only touches module-level Firebase instances. */
+  const signInWithGoogleIdToken = useCallback(async (idToken: string) => {
+    if (!auth) {
+      throw new Error('Firebase is not configured. Add EXPO_PUBLIC_FIREBASE_* to .env.local.');
+    }
+    await signInWithCredential(auth, GoogleAuthProvider.credential(idToken));
+  }, []);
 
   // Restore session: Firebase listener when configured, local profile otherwise.
   useEffect(() => {
@@ -148,64 +150,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, []);
 
-  // Exchange the Google ID token for a Firebase session.
-  // State updates happen in the async continuation, never in the effect body.
-  useEffect(() => {
-    if (!auth || !googleResponse || googleResponse.type !== 'success') return;
-    const idToken = googleResponse.params?.id_token;
-    if (!idToken) return;
-    const credential = GoogleAuthProvider.credential(idToken);
-    signInWithCredential(auth, credential).catch((err: unknown) => {
-      console.warn('[strawhub] firebase sign-in failed:', err);
-      setError(
-        err instanceof Error && err.message
-          ? `Firebase sign-in failed: ${err.message}`
-          : 'Firebase sign-in failed.'
-      );
-    });
-  }, [googleResponse]);
-
-  // A failed OAuth round-trip is derived from the response, not stored.
-  const responseError =
-    googleResponse?.type === 'error'
-      ? 'Google sign-in was cancelled or failed.'
-      : null;
-  const lastError = error ?? responseError;
-
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       loading,
       isFirebaseConfigured,
-      googleReady: isFirebaseConfigured && googleRequest !== null,
-      signInWithGoogle: async () => {
-        setError(null);
-        if (!isFirebaseConfigured || !auth) {
-          setError('Firebase is not configured — use the demo profile instead.');
-          return;
-        }
-        if (!googleRequest) {
-          setError('Google sign-in is not set up (missing EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID).');
-          return;
-        }
-        await promptGoogle();
-      },
+      signInWithGoogleIdToken,
       signInDemo: async () => {
-        setError(null);
         setUser(DEMO_USER);
         await persistProfile(DEMO_USER);
       },
       signOut: async () => {
-        setError(null);
         if (auth && !user?.isDemo) {
           await firebaseSignOut(auth);
         }
         setUser(null);
         await clearProfile();
       },
-      lastError,
     }),
-    [user, loading, googleRequest, promptGoogle, lastError]
+    [user, loading, signInWithGoogleIdToken]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -21,11 +21,12 @@ type RNStorage = {
 
 /**
  * `getReactNativePersistence` ships in the React Native build that Metro
- * selects, but it is absent from the published web type definitions.
+ * selects, but it is absent from the web/node builds used for SSR and the
+ * published web type definitions.
  */
 const getReactNativePersistence = (
   firebaseAuth as unknown as {
-    getReactNativePersistence: (storage: RNStorage) => firebaseAuth.Persistence;
+    getReactNativePersistence?: (storage: RNStorage) => firebaseAuth.Persistence;
   }
 ).getReactNativePersistence;
 
@@ -56,14 +57,20 @@ export const firebaseApp: FirebaseApp | null = isFirebaseConfigured
   : null;
 
 /**
- * Initialize once; on Fast Refresh (module re-evaluation) reuse the existing
- * instances instead of throwing auth/already-initialized.
+ * Auth session persists in AsyncStorage on React Native (an active token
+ * survives restarts). On web/node the SDK's default persistence applies.
+ * The try/catch keeps Fast Refresh (module re-evaluation) from throwing
+ * auth/already-initialized.
  */
 function createAuth(app: FirebaseApp): firebaseAuth.Auth {
+  const persistence = getReactNativePersistence
+    ? getReactNativePersistence(AsyncStorage)
+    : undefined;
+  if (!persistence) {
+    return firebaseAuth.getAuth(app);
+  }
   try {
-    return firebaseAuth.initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage),
-    });
+    return firebaseAuth.initializeAuth(app, { persistence });
   } catch {
     return firebaseAuth.getAuth(app);
   }
@@ -80,7 +87,6 @@ function createFirestore(app: FirebaseApp): Firestore {
   }
 }
 
-/** Auth session persists in AsyncStorage, so an active token survives restarts. */
 export const auth: firebaseAuth.Auth | null = firebaseApp ? createAuth(firebaseApp) : null;
 
 export const firestore: Firestore | null = firebaseApp ? createFirestore(firebaseApp) : null;

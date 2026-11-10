@@ -4,9 +4,13 @@
  * Follows the design system splash archetype (design.md §8): moss canvas,
  * centered brand mark, serif display headline, white hero pill.
  * A demo profile keeps the prototype usable without Firebase config.
+ *
+ * The Google request hook lives in `GoogleSignInButton`, mounted only when a
+ * client ID is configured: the hook throws without one, including during the
+ * Expo Router web server render.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -15,23 +19,16 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIdTokenAuthRequest } from 'expo-auth-session/providers/google';
 
 import { Colors, Fonts, Radius, Spacing, Typography } from '@/constants/theme';
+import { GOOGLE_WEB_CLIENT_ID } from '@/lib/firebase';
 import { useAuth } from '@/store/auth-store';
 
 export default function LoginScreen() {
-  const { isFirebaseConfigured, googleReady, signInWithGoogle, signInDemo, lastError } =
-    useAuth();
+  const { isFirebaseConfigured, signInDemo } = useAuth();
   const [busy, setBusy] = useState(false);
-
-  const handleGoogle = async () => {
-    setBusy(true);
-    try {
-      await signInWithGoogle();
-    } finally {
-      setBusy(false);
-    }
-  };
+  const googleEnabled = isFirebaseConfigured && GOOGLE_WEB_CLIENT_ID.length > 0;
 
   const handleDemo = async () => {
     setBusy(true);
@@ -56,50 +53,102 @@ export default function LoginScreen() {
       </View>
 
       <View style={styles.footer}>
-        {busy ? (
-          <ActivityIndicator color={Colors.coral} />
+        {googleEnabled ? (
+          <GoogleSignInButton />
         ) : (
-          <>
-            {isFirebaseConfigured ? (
-              <Pressable
-                onPress={handleGoogle}
-                disabled={!googleReady}
-                style={({ pressed }) => [
-                  styles.primaryPill,
-                  !googleReady && styles.disabled,
-                  pressed && { opacity: 0.85 },
-                ]}
-              >
-                <Text style={styles.primaryText}>
-                  {googleReady ? 'Sign in with Google' : 'Google sign-in not configured'}
-                </Text>
-              </Pressable>
-            ) : (
-              <View style={styles.notePill}>
-                <Text style={styles.noteText}>
-                  Firebase not configured — running in demo mode. Add your keys to
-                  .env.local to enable Google Sign-In.
-                </Text>
-              </View>
-            )}
-
-            <Pressable
-              onPress={handleDemo}
-              disabled={busy}
-              style={({ pressed }) => [styles.demoButton, pressed && { opacity: 0.7 }]}
-            >
-              <Text style={styles.demoText}>Continue with demo profile</Text>
-            </Pressable>
-
-            {lastError ? (
-              <View style={styles.errorPill}>
-                <Text style={styles.errorText}>{lastError}</Text>
-              </View>
-            ) : null}
-          </>
+          <View style={styles.notePill}>
+            <Text style={styles.noteText}>
+              {isFirebaseConfigured
+                ? 'Google sign-in is not set up — add EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID to .env.local.'
+                : 'Firebase not configured — running in demo mode. Add your keys to .env.local to enable Google Sign-In.'}
+            </Text>
+          </View>
         )}
+
+        <Pressable
+          onPress={handleDemo}
+          disabled={busy}
+          style={({ pressed }) => [styles.demoButton, pressed && { opacity: 0.7 }]}
+        >
+          {busy ? (
+            <ActivityIndicator color="rgba(255,255,255,0.9)" />
+          ) : (
+            <Text style={styles.demoText}>Continue with demo profile</Text>
+          )}
+        </Pressable>
       </View>
     </SafeAreaView>
+  );
+}
+
+function GoogleSignInButton() {
+  const { signInWithGoogleIdToken } = useAuth();
+  const [request, response, promptAsync] = useIdTokenAuthRequest({
+    // Web needs `webClientId`; native falls back to `clientId` — same OAuth client.
+    clientId: GOOGLE_WEB_CLIENT_ID,
+    webClientId: GOOGLE_WEB_CLIENT_ID,
+    selectAccount: true,
+  });
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Exchange the Google ID token for a Firebase session.
+  // State updates happen in the async continuation, never in the effect body.
+  useEffect(() => {
+    if (!response || response.type !== 'success') return;
+    const idToken = response.params?.id_token;
+    if (!idToken) return;
+    signInWithGoogleIdToken(idToken).catch((err: unknown) => {
+      console.warn('[strawhub] firebase sign-in failed:', err);
+      setError(
+        err instanceof Error && err.message
+          ? `Firebase sign-in failed: ${err.message}`
+          : 'Firebase sign-in failed.'
+      );
+    });
+  }, [response, signInWithGoogleIdToken]);
+
+  // A failed OAuth round-trip is derived from the response, not stored.
+  const responseError =
+    response?.type === 'error' ? 'Google sign-in was cancelled or failed.' : null;
+
+  const handlePress = async () => {
+    setError(null);
+    setBusy(true);
+    try {
+      await promptAsync();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const disabled = !request || busy;
+
+  return (
+    <>
+      <Pressable
+        onPress={handlePress}
+        disabled={disabled}
+        style={({ pressed }) => [
+          styles.primaryPill,
+          disabled && styles.disabled,
+          pressed && { opacity: 0.85 },
+        ]}
+      >
+        {busy ? (
+          <ActivityIndicator color={Colors.soil} />
+        ) : (
+          <Text style={styles.primaryText}>
+            {request ? 'Sign in with Google' : 'Preparing Google sign-in…'}
+          </Text>
+        )}
+      </Pressable>
+      {error || responseError ? (
+        <View style={styles.errorPill}>
+          <Text style={styles.errorText}>{error ?? responseError}</Text>
+        </View>
+      ) : null}
+    </>
   );
 }
 
@@ -137,7 +186,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.regular,
     fontSize: Typography.caption,
     lineHeight: 18,
-    color: 'rgba(255,255,255,0.8)',
+    color: 'rgba(255,255,255,0.85)',
     textAlign: 'center',
     maxWidth: 300,
   },
@@ -171,7 +220,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.85)',
     textAlign: 'center',
   },
-  demoButton: { paddingVertical: Spacing.sm, alignItems: 'center' },
+  demoButton: { paddingVertical: Spacing.sm, alignItems: 'center', minHeight: 44, justifyContent: 'center' },
   demoText: {
     fontFamily: Fonts.sans.semibold,
     fontSize: Typography.caption,
